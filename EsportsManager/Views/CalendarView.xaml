@@ -1,0 +1,31 @@
+<!-- CalendarView.xaml -->
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="EsportsManager.Views.CalendarView"
+             Title="Calendar">
+
+    <Grid RowDefinitions="Auto,*,Auto">
+        <!-- Current week/year -->
+        <VerticalStackLayout Grid.Row="0" Padding="10" Spacing="5" HorizontalOptions="Center">
+            <Label Text="{Binding CurrentYear, StringFormat='Year: {0}'}" FontSize="24" FontAttributes="Bold" />
+            <Label Text="{Binding CurrentWeek, StringFormat='Week: {0}'}" FontSize="20" />
+        </VerticalStackLayout>
+
+        <!-- Weekly events -->
+        <CollectionView Grid.Row="1" ItemsSource="{Binding WeeklyEvents}">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Grid Padding="10" ColumnDefinitions="Auto,*,Auto">
+                        <Label Grid.Column="0" Text="{Binding Type}" FontAttributes="Bold" />
+                        <Label Grid.Column="1" Text="{Binding Description}" />
+                        <Label Grid.Column="2" Text="{Binding Date, StringFormat='{0:MMM dd}'}" />
+                    </Grid>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <!-- Next week button -->
+        <Button Grid.Row="2" Text="Next Week" Command="{Binding NextWeekCommand}" 
+                HorizontalOptions="Center" Margin="10" Padding="20,10" />
+    </Grid>
+</ContentPage>

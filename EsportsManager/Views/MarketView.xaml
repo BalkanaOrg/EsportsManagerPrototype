@@ -1,0 +1,93 @@
+<!-- MarketView.xaml -->
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:EsportsManager.ViewModels"
+             x:Class="EsportsManager.Views.MarketView"
+             Title="Player Market">
+
+    <Grid RowDefinitions="Auto,*,Auto">
+        <!-- Search/filter options -->
+        <SearchBar Grid.Row="0" Placeholder="Search players..." Text="{Binding SearchText}" />
+
+        <!-- Players list -->
+        <RefreshView Grid.Row="1" Command="{Binding RefreshCommand}">
+            <!--<CollectionView ItemsSource="{Binding Players}" SelectionMode="Single" SelectedItem="{Binding SelectedPlayer}">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Padding="10" ColumnDefinitions="Auto,*,Auto">
+                            <Image Grid.Column="0" Source="{Binding Nationality, Converter={StaticResource NationalityToFlagConverter}}" 
+                                   WidthRequest="40" HeightRequest="30" Aspect="AspectFill" />
+
+                            <VerticalStackLayout Grid.Column="1" Spacing="2">
+                                <Label Text="{Binding FullName}" FontAttributes="Bold" />
+                                <Label Text="{Binding Role}" FontSize="14" />
+                                <Label Text="{Binding Stats.Rating, StringFormat='Rating: {0:F2}'}" FontSize="12" />
+                                <Label Text="{Binding MarketValue, StringFormat='Value: ${0:N0}'}" FontSize="12" />
+                                <Label Text="{Binding Salary, StringFormat='Salary: ${0:N0}/week'}" FontSize="12" />
+                            </VerticalStackLayout>
+
+                            <Button Grid.Column="2" Text="Sign" Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:MarketViewModel}}, Path=SignPlayerCommand}" 
+                                    CommandParameter="{Binding .}" />
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>-->
+            <CollectionView
+    Grid.Row="1"
+    ItemsSource="{Binding Players}"
+    SelectionMode="Single"
+    SelectedItem="{Binding SelectedPlayer}"
+    Margin="5">
+
+                <CollectionView.ItemsLayout>
+                    <GridItemsLayout Orientation="Vertical" Span="5" />
+                </CollectionView.ItemsLayout>
+
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Frame
+                BackgroundColor="Gray"
+                CornerRadius="5"
+                HasShadow="True"
+                Padding="3"
+                Margin="3"
+                HeightRequest="230"
+                WidthRequest="180">
+
+                            <VerticalStackLayout Spacing="2" HorizontalOptions="Center" VerticalOptions="Center">
+                                <Image
+                        Source="{Binding Nationality, Converter={StaticResource NationalityToFlagConverter}}"
+                        WidthRequest="40"
+                        HeightRequest="30"
+                        Aspect="AspectFit" />
+
+                                <Label Text="{Binding FullName}" FontAttributes="Bold" FontSize="12" HorizontalTextAlignment="Center" />
+                                <Label Text="{Binding Role}" FontSize="10" HorizontalTextAlignment="Center" />
+                                <Label Text="{Binding Stats.Rating, StringFormat='Rating: {0:F2}'}" FontSize="10" HorizontalTextAlignment="Center" />
+                                <Label Text="{Binding MarketValue, StringFormat='${0:N0}'}" FontSize="10" HorizontalTextAlignment="Center" />
+                                <Label Text="{Binding Salary, StringFormat='${0:N0}/w'}" FontSize="10" HorizontalTextAlignment="Center" />
+
+                                <Button
+                        Text="Sign"
+                        FontSize="10"
+                        Padding="0"
+                        HeightRequest="30"
+                        WidthRequest="80"
+                        HorizontalOptions="Center"
+                        Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:MarketViewModel}}, Path=SignPlayerCommand}"
+                        CommandParameter="{Binding .}" />
+                            </VerticalStackLayout>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </RefreshView>
+
+        <!-- Current team info -->
+        <VerticalStackLayout Grid.Row="2" Padding="10" Spacing="5">
+            <Label Text="{Binding Team.Name}" FontSize="16" FontAttributes="Bold" />
+            <Label Text="{Binding Team.Budget, StringFormat='Budget: ${0:N0}'}" />
+            <Label Text="{Binding Team.Players.Count, StringFormat='Players: {0}/5'}" />
+        </VerticalStackLayout>
+    </Grid>
+</ContentPage>

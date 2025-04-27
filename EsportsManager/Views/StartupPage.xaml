@@ -1,0 +1,14 @@
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="EsportsManager.Views.StartupPage"
+             Title="Create Your Team">
+
+    <VerticalStackLayout Padding="20" Spacing="20" VerticalOptions="Center">
+        <Label Text="Welcome to Esports Manager" FontSize="24" HorizontalOptions="Center" />
+        <Label Text="Create your Counter-Strike team" FontSize="18" HorizontalOptions="Center" />
+
+        <Entry Placeholder="Enter your team name" Text="{Binding TeamName}" />
+
+        <Button Text="Create Team" Command="{Binding CreateTeamCommand}" />
+    </VerticalStackLayout>
+</ContentPage>

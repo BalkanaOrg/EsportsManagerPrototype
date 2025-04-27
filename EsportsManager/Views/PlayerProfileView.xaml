@@ -1,0 +1,107 @@
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="EsportsManager.Views.PlayerProfileView"
+             Title="Player Profile">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="20">
+
+            <!-- Player Basic Info -->
+            <Frame BorderColor="LightGray" CornerRadius="10" Padding="10" HasShadow="False">
+                <Grid ColumnDefinitions="auto, *" RowSpacing="10">
+                    <Image Source="{Binding Player.Nationality, Converter={StaticResource NationalityToFlagConverter}}"
+                       WidthRequest="80" HeightRequest="60" Aspect="AspectFill" />
+
+                    <VerticalStackLayout Grid.Column="0" Spacing="4">
+                        <Label Text="{Binding Player.FullName}" FontSize="24" FontAttributes="Bold" />
+                        <Label Text="{Binding Player.Role}" FontSize="18" />
+                        <Label Text="{Binding Player.Age, StringFormat='Age: {0}'}" FontSize="16" />
+                        <Label Text="{Binding Player.Nationality}" FontSize="16" />
+                        <Label Text="{Binding Player.MarketValue, StringFormat='Value: ${0:N0}'}" FontSize="16" />
+                        <Label Text="{Binding Player.Salary, StringFormat='Salary: ${0:N0}/week'}" FontSize="16" />
+                    </VerticalStackLayout>
+                </Grid>
+            </Frame>
+
+            <!-- Stats -->
+            <Frame BorderColor="LightGray" CornerRadius="10" Padding="10" HasShadow="False">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="Player Stats" FontSize="18" FontAttributes="Bold" />
+
+                    <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto,Auto">
+                        <Label Grid.Row="0" Grid.Column="0" Text="{Binding Player.Stats.Rating, StringFormat='Rating: {0:F2}'}" />
+                        <Label Grid.Row="0" Grid.Column="1" Text="{Binding Player.Stats.Potential, StringFormat='Potential: {0}'}" />
+
+                        <Label Grid.Row="1" Grid.Column="0" Text="{Binding Player.Stats.Aim, StringFormat='Aim: {0}'}" />
+                        <Label Grid.Row="1" Grid.Column="1" Text="{Binding Player.Stats.Reflexes, StringFormat='Reflexes: {0}'}" />
+
+                        <Label Grid.Row="2" Grid.Column="0" Text="{Binding Player.Stats.GameSense, StringFormat='Game Sense: {0}'}" />
+                        <Label Grid.Row="2" Grid.Column="1" Text="{Binding Player.Stats.Teamwork, StringFormat='Teamwork: {0}'}" />
+
+                        <Label Grid.Row="3" Grid.Column="0" Text="{Binding Player.Stats.Consistency, StringFormat='Consistency: {0}'}" />
+                    </Grid>
+
+                    <ProgressBar Progress="{Binding Player.Stats.Rating, Converter={StaticResource RatingToProgressConverter}}"
+                                 HeightRequest="20"
+                                 BackgroundColor="LightGray" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Current Team -->
+            <Frame BorderColor="LightGray" CornerRadius="10" Padding="10" HasShadow="False">
+                <Grid ColumnDefinitions="Auto, *">
+                    <Label Text="Team:" FontSize="18" FontAttributes="Bold" />
+                    <Label Grid.Column="1" Text="{Binding Player.CurrentTeam.Name}" FontSize="16" HorizontalOptions="Start" />
+                </Grid>
+            </Frame>
+
+            <!-- Action Buttons -->
+            <HorizontalStackLayout Spacing="15" HorizontalOptions="Center">
+                <Button x:Name="SignButton"
+                        Text="Sign Player" 
+                        Clicked="OnSignPlayerClicked"
+                        IsVisible="{Binding IsFreeAgent}" />
+
+                <Button x:Name="ReleaseButton"
+                        Text="Release Player" 
+                        Clicked="OnReleasePlayerClicked"
+                        IsVisible="{Binding IsTeamPlayer}" />
+
+                <Button x:Name="BenchButton"
+                        Text="Move to Bench" 
+                        Command="{Binding BenchPlayerCommand}" 
+                        IsVisible="{Binding IsActivePlayer}" />
+
+                <Button x:Name="ActivateButton"
+                        Text="Move to Active" 
+                        Command="{Binding ActivatePlayerCommand}" 
+                        IsVisible="{Binding IsBenchedPlayer}" />
+            </HorizontalStackLayout>
+
+            <!-- Match History -->
+            <VerticalStackLayout>
+                <Label Text="Match History" FontSize="18" FontAttributes="Bold" />
+                <CollectionView ItemsSource="{Binding Player.MatchHistory}">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Padding="10" ColumnDefinitions="*,Auto,Auto" RowDefinitions="Auto,Auto">
+                                <Label Grid.Row="0" Grid.Column="0" Text="{Binding Match.Tournament.Name}" FontAttributes="Bold" />
+                                <Label Grid.Row="0" Grid.Column="1" Text="{Binding Match.Team1.Name}" />
+                                <Label Grid.Row="0" Grid.Column="2" Text="{Binding Match.Team2.Name}" />
+
+                                <Label Grid.Row="1" Grid.Column="0" Text="{Binding Match.MatchDate, StringFormat='{0:yyyy-MM-dd}'}" FontSize="12" />
+                                <Label Grid.Row="1" Grid.Column="1" Text="{Binding Match.Team1Score}" FontAttributes="Bold" />
+                                <Label Grid.Row="1" Grid.Column="2" Text="{Binding Match.Team2Score}" FontAttributes="Bold" />
+
+                                <BoxView Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" Grid.ColumnSpan="3"
+                                         BackgroundColor="{Binding Match.Winner, Converter={StaticResource TeamToColorConverter}, ConverterParameter={Binding Player.CurrentTeamId}}"
+                                         Opacity="0.2" />
+                            </Grid>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </VerticalStackLayout>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

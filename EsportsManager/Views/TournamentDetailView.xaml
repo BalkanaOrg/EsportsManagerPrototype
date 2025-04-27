@@ -1,0 +1,65 @@
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:EsportsManager.ViewModels"
+             xmlns:models="clr-namespace:EsportsManager.Models"
+             x:Class="EsportsManager.Views.TournamentDetailView"
+             Title="{Binding Tournament.Name}"
+             x:DataType="vm:TournamentDetailViewModel"
+             x:Name="TournamentPage">
+
+    <ScrollView>
+        <StackLayout Padding="10" Spacing="10">
+            <!-- Tournament Header -->
+            <Frame>
+                <StackLayout IsVisible="{Binding Tournament, Converter={StaticResource NullToBoolConverter}}">
+                    <Label Text="No tournament data available"
+                   HorizontalOptions="Center"
+                   VerticalOptions="Center"
+                   FontAttributes="Italic"/>
+                </StackLayout>
+                <StackLayout>
+                    <Label Text="{Binding Tournament.Name}" 
+                           FontSize="20" FontAttributes="Bold"/>
+                    <Label Text="{Binding Tournament.Tier, 
+                           StringFormat='Tier: {0}'}"/>
+                    <Label Text="{Binding Tournament.PrizePool, 
+                           StringFormat='Prize Pool: ${0:N0}'}"/>
+                    <Label Text="{Binding Tournament.Week, 
+                           StringFormat='Starts Week: {0}'}"/>
+                </StackLayout>
+            </Frame>
+
+            <!-- Participating Teams -->
+            <Label Text="Participating Teams:" 
+                   FontSize="16" FontAttributes="Bold"/>
+            <CollectionView ItemsSource="{Binding Tournament.ParticipatingTeams}">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:Team">
+                        <Button Text="{Binding Name}"
+                    Command="{Binding Source={x:Reference TournamentPage}, Path=BindingContext.ViewTeamCommand}"
+                    CommandParameter="{Binding .}" />
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+            <!-- Match Schedule -->
+            <Label Text="Match Schedule:" 
+                   FontSize="16" FontAttributes="Bold"/>
+            <CollectionView ItemsSource="{Binding Tournament.Matches}">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Frame Padding="10">
+                            <Grid ColumnDefinitions="*,Auto,*">
+                                <Label Text="{Binding Team1.Name}" 
+                                       HorizontalOptions="End"/>
+                                <Label Grid.Column="1" Text="vs" 
+                                       HorizontalOptions="Center"/>
+                                <Label Grid.Column="2" Text="{Binding Team2.Name}" 
+                                       HorizontalOptions="Start"/>
+                            </Grid>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </StackLayout>
+    </ScrollView>
+</ContentPage>

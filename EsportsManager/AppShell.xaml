@@ -1,0 +1,23 @@
+<!-- AppShell.xaml -->
+<Shell xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+       xmlns:views="clr-namespace:EsportsManager.Views"
+       x:Class="EsportsManager.AppShell"
+       Title="EsportsManager"
+       FlyoutBehavior="Disabled">
+
+    <TabBar>
+        <Tab Title="Team" Icon="icon_team.png">
+            <ShellContent ContentTemplate="{DataTemplate views:TeamView}" />
+        </Tab>
+        <Tab Title="Market" Icon="icon_market.png">
+            <ShellContent ContentTemplate="{DataTemplate views:MarketView}" />
+        </Tab>
+        <Tab Title="Tournaments" Icon="icon_tournament.png">
+            <ShellContent ContentTemplate="{DataTemplate views:TournamentsView}" />
+        </Tab>
+        <Tab Title="Calendar" Icon="icon_calendar.png">
+            <ShellContent ContentTemplate="{DataTemplate views:CalendarView}" />
+        </Tab>
+    </TabBar>
+</Shell>
