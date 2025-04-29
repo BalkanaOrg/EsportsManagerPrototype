@@ -1,40 +1,52 @@
-﻿using EsportsManager.Models;
-using EsportsManager.Views;
-using System.Windows.Input;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using EsportsManager.Models;
+using EsportsManager.Services;
+using System;
+using System.Threading.Tasks;
 
-public class TeamProfileViewModel : BaseViewModel
+namespace EsportsManager.ViewModels
 {
-    private Team _team;
-
-    public Team Team
+    [QueryProperty(nameof(TeamId), "TeamId")]
+    public partial class TeamProfileViewModel : BaseViewModel
     {
-        get => _team;
-        set => SetProperty(ref _team, value);
-    }
+        private Team _team;
 
-    public ICommand ViewPlayerCommand { get; }
-
-    public TeamProfileViewModel(GameService gameService, Team team) : base(gameService)
-    {
-        Team = team;
-        ViewPlayerCommand = new Command<Player>(ViewPlayer);
-    }
-
-    private async void ViewTeam(Team team)
-    {
-        if (team == null) return;
-
-        var teamVM = new TeamProfileViewModel(_gameService, team);
-        await Shell.Current.Navigation.PushAsync(new PlayerProfileView
+        public Team Team
         {
-            BindingContext = teamVM
-        });
-    }
+            get => _team;
+            set => SetProperty(ref _team, value);
+        }
 
-    private async void ViewPlayer(Player player)
-    {
-        if (player == null) return;
+        private int _teamId;
+        public int TeamId
+        {
+            get => _teamId;
+            set => SetProperty(ref _teamId, value, onChanged: () => LoadTeam(value));
+        }
 
-        await Shell.Current.GoToAsync($"playerprofile?PlayerId={player.Id}");
+        private readonly GameService _gameService;
+
+        public TeamProfileViewModel(GameService gameService) : base(gameService)
+        {
+            _gameService = gameService;
+        }
+
+        public async Task LoadTeam(int teamId)
+        {
+            try
+            {
+                Team = await _gameService.GetTeamByIdAsync(teamId);
+                if (Team == null)
+                {
+                    await Shell.Current.DisplayAlert("Error", "Team not found", "OK");
+                    await Shell.Current.GoToAsync("..");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error loading team: {ex}");
+                await Shell.Current.DisplayAlert("Error", ex.Message, "OK");
+            }
+        }
     }
 }

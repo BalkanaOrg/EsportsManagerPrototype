@@ -12,6 +12,8 @@ namespace EsportsManager.Models
         C,
         B,
         A,
-        Major
+        Major,
+        S,
+        RMR
     }
 }

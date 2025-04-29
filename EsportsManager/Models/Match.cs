@@ -16,7 +16,18 @@ namespace EsportsManager.Models
         public DateTime MatchDate { get; set; }
         public Tournament Tournament { get; set; }
         public bool IsCompleted { get; set; }
-        public Team Winner => Team1Score > Team2Score ? Team1 : Team2;
+        public int Year { get; set; }
+        public int Week { get; set; }
+        public string Stage { get; set; } // e.g., "Group A", "Quarterfinals"
+        public bool IsDeciderMatch { get; set; }
+        public string Map { get; set; } = "de_dust2";
+
+        private Team _winner;
+        public Team Winner
+        {
+            get => _winner ?? (Team1Score > Team2Score ? Team1 : Team2);
+            set => _winner = value;
+        }
     }
 
 }

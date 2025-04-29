@@ -11,22 +11,25 @@
         <StackLayout Padding="10" Spacing="10">
             <!-- Tournament Header -->
             <Frame>
-                <StackLayout IsVisible="{Binding Tournament, Converter={StaticResource NullToBoolConverter}}">
-                    <Label Text="No tournament data available"
+                <!-- Single container for both layouts -->
+                <Grid>
+                    <!-- "No data" message (shown when Tournament is null) -->
+                    <StackLayout IsVisible="{Binding Tournament, Converter={StaticResource NullToBoolConverter}}">
+                        <Label Text="No tournament data available"
                    HorizontalOptions="Center"
                    VerticalOptions="Center"
                    FontAttributes="Italic"/>
-                </StackLayout>
-                <StackLayout>
-                    <Label Text="{Binding Tournament.Name}" 
-                           FontSize="20" FontAttributes="Bold"/>
-                    <Label Text="{Binding Tournament.Tier, 
-                           StringFormat='Tier: {0}'}"/>
-                    <Label Text="{Binding Tournament.PrizePool, 
-                           StringFormat='Prize Pool: ${0:N0}'}"/>
-                    <Label Text="{Binding Tournament.Week, 
-                           StringFormat='Starts Week: {0}'}"/>
-                </StackLayout>
+                    </StackLayout>
+
+                    <!-- Tournament details (shown when Tournament exists) -->
+                    <StackLayout IsVisible="{Binding Tournament, Converter={StaticResource InverseNullToBoolConverter}}">
+                        <Label Text="{Binding Tournament.Name}" 
+                   FontSize="20" FontAttributes="Bold"/>
+                        <Label Text="{Binding Tournament.Tier, StringFormat='Tier: {0}'}"/>
+                        <Label Text="{Binding Tournament.PrizePool, StringFormat='Prize Pool: ${0:N0}'}"/>
+                        <Label Text="{Binding Tournament.Week, StringFormat='Starts Week: {0}'}"/>
+                    </StackLayout>
+                </Grid>
             </Frame>
 
             <!-- Participating Teams -->

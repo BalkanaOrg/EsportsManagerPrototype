@@ -10,6 +10,7 @@ namespace EsportsManager.ViewModels
     {
         public ObservableCollection<Player> ActivePlayers { get; set; }
         public ObservableCollection<Player> BenchPlayers { get; set; }
+        public decimal WeeklyExpense { get; set; }
 
         private Team _team;
         private Player _selectedPlayer;
@@ -45,11 +46,11 @@ namespace EsportsManager.ViewModels
         {
             var team = _gameService.GetGameState().UserTeam;
             Team = team;
-            team.Budget = _gameService.ReturnBudget();
 
             ActivePlayers = new ObservableCollection<Player>(team.Players);
             BenchPlayers = new ObservableCollection<Player>(team.Bench);
 
+            RefreshBudget();
             OnPropertyChanged(nameof(Team));
             OnPropertyChanged(nameof(ActivePlayers)); // <- ADD THIS
             OnPropertyChanged(nameof(BenchPlayers));  // <- AND THIS
@@ -65,7 +66,11 @@ namespace EsportsManager.ViewModels
         }
         private void RefreshBudget()
         {
-            
+            var team = _gameService.GetGameState().UserTeam;
+            team.Budget = _gameService.ReturnBudget();
+            team.WeeklyExpense = _gameService.GetGameState().WeeklyExpense;
+            OnPropertyChanged(nameof(Team.WeeklyExpense));
+            OnPropertyChanged(nameof(Team.Budget));
         }
 
         private void ActivatePlayer(Player player)
@@ -84,6 +89,8 @@ namespace EsportsManager.ViewModels
                 bool confirm = await Shell.Current.DisplayAlert("Release Player",$"Are you sure you want to release {player.FullName}?","Yes", "No");
                 if (confirm)
                 {
+                    var team = _gameService.GetGameState().UserTeam;
+                    team.WeeklyExpense -= player.Salary;
                     _gameService.ReleasePlayer(player);
                     RefreshTeam();
                 }
@@ -94,7 +101,7 @@ namespace EsportsManager.ViewModels
         {
             if (player == null) return;
 
-            var vm = new PlayerProfileViewModel(_gameService, player);
+            var vm = new PlayerProfileViewModel(_gameService, player, true);
             var page = new PlayerProfileView { BindingContext = vm };
             await Application.Current.MainPage.Navigation.PushAsync(page);
 

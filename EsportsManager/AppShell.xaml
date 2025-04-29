@@ -19,5 +19,8 @@
         <Tab Title="Calendar" Icon="icon_calendar.png">
             <ShellContent ContentTemplate="{DataTemplate views:CalendarView}" />
         </Tab>
+        <Tab Title="World Ranking" Icon="icon_calendar.png">
+            <ShellContent ContentTemplate="{DataTemplate views:WorldRankingsPage}" />
+        </Tab>
     </TabBar>
 </Shell>

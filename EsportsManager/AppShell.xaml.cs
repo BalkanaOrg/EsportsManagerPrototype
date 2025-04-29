@@ -9,7 +9,7 @@ public partial class AppShell : Shell
 		InitializeComponent();
         Routing.RegisterRoute("teamprofile", typeof(TeamProfileView));
         Routing.RegisterRoute("playerprofile", typeof(PlayerProfileView));
-        Routing.RegisterRoute("tournamentdetail", typeof(TournamentDetailView));
         Routing.RegisterRoute(nameof(TournamentDetailView), typeof(TournamentDetailView));
+        Routing.RegisterRoute(nameof(TeamProfileView), typeof(TeamProfileView));
     }
 }

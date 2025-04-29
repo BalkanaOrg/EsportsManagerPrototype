@@ -12,7 +12,11 @@ namespace EsportsManager.ViewModels
         private Tournament _selectedTournament;
         private string _currentFilter = "Active";
 
-        public ObservableCollection<Tournament> Tournaments { get; } = new();
+        public ObservableCollection<Tournament> Tournaments
+        {
+            get => _tournaments;
+            set => SetProperty(ref _tournaments, value);
+        }
 
         public Tournament SelectedTournament
         {
@@ -27,19 +31,17 @@ namespace EsportsManager.ViewModels
 
         public TournamentsViewModel(GameService gameService) : base(gameService)
         {
-            RefreshTournaments();
-
+            Tournaments = new ObservableCollection<Tournament>(); 
             RefreshCommand = new Command(RefreshTournaments);
             FilterCommand = new Command<string>(FilterTournaments);
             ViewTournamentCommand = new Command<Tournament>(ViewTournament);
             ViewTeamCommand = new Command<Team>(ViewTeam);
 
-            LoadTournaments();
+            FilterTournaments(_currentFilter);
         }
 
         private void RefreshTournaments()
         {
-            var state = _gameService.GetGameState();
             FilterTournaments(_currentFilter);
         }
 
@@ -60,18 +62,18 @@ namespace EsportsManager.ViewModels
             switch (filter)
             {
                 case "Active":
-                    _tournaments = new ObservableCollection<Tournament>(state.ActiveTournaments);
+                    Tournaments = new ObservableCollection<Tournament>(
+                        state.ActiveTournaments.OrderBy(t => t.Week).ThenBy(t => t.Tier));
                     break;
                 case "Upcoming":
                     // Find tournaments that haven't started yet
-                    var upcoming = state.ActiveTournaments
-                        .Where(t => t.Year > state.CurrentYear ||
-                                  (t.Year == state.CurrentYear && t.Week > state.CurrentWeek))
-                        .ToList();
-                    _tournaments = new ObservableCollection<Tournament>(upcoming);
+                    var upcoming = state.UpcomingTournaments
+                        .OrderBy(t => t.Week)
+                        .ThenBy(t => t.Tier);
+                    Tournaments = new ObservableCollection<Tournament>(upcoming);
                     break;
                 case "Completed":
-                    _tournaments = new ObservableCollection<Tournament>(state.CompletedTournaments);
+                    Tournaments = new ObservableCollection<Tournament>(state.CompletedTournaments.OrderBy(t => t.Year).ThenBy(t => t.Week));
                     break;
             }
         }
@@ -93,25 +95,40 @@ namespace EsportsManager.ViewModels
 
         private async void ViewTeam(Team team)
         {
-            if (team == null) return;
-            await Shell.Current.Navigation.PushAsync(new TeamProfileView(team));
+            try
+            {
+                if (team == null) return;
+                await Shell.Current.GoToAsync($"{nameof(TeamProfileView)}?TeamId={team.Id}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error navigating to team: {ex}");
+                await Shell.Current.DisplayAlert("Error", ex.Message, "OK");
+            }
         }
 
         private async void ShowTournamentDetails(Tournament tournament)
         {
-            if (tournament == null) return;
+            try
+            {
+                if (tournament == null) return;
+                SelectedTournament = null;
 
-            // Reset selection
-            SelectedTournament = null;
-
-            // Show tournament details
-            await Application.Current.MainPage.DisplayAlert(tournament.Name,
-                $"Tier: {tournament.Tier}\n" +
-                $"Prize Pool: ${tournament.PrizePool:N0}\n" +
-                $"Date: Week {tournament.Week} of {tournament.Year}\n" +
-                $"Teams: {tournament.ParticipatingTeams.Count}\n" +
-                $"Matches Played: {tournament.Matches.Count(m => m.IsCompleted)}/{tournament.Matches.Count}",
-                "OK");
+                await Application.Current.MainPage.DisplayAlert(tournament.Name,
+                    $"Tier: {tournament.Tier}\n" +
+                    $"Prize Pool: ${tournament.PrizePool:N0}\n" +
+                    $"Date: Week {tournament.Week} of {tournament.Year}\n" +
+                    $"Teams: {tournament.ParticipatingTeams.Count}\n" +
+                    $"Matches Played: {tournament.Matches.Count(m => m.IsCompleted)}/{tournament.Matches.Count}",
+                    "OK");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Navigation failed: {ex.ToString()}");
+                await Shell.Current.DisplayAlert("Error",
+                    $"Couldn't open tournament: {ex.Message}",
+                    "OK");
+            }
         }
 
         public void LoadData()

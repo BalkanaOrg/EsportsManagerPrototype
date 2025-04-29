@@ -44,7 +44,7 @@ public class CalendarViewModel : BaseViewModel
         var events = new List<CalendarEvent>();
 
         // Add tournaments happening this week
-        foreach (var tournament in state.ActiveTournaments
+        foreach (var tournament in state.UpcomingTournaments
             .Where(t => t.Year == CurrentYear &&
                        t.Week <= CurrentWeek &&
                        t.Week + t.DurationWeeks > CurrentWeek))
@@ -75,13 +75,23 @@ public class CalendarViewModel : BaseViewModel
         WeeklyEvents = new ObservableCollection<CalendarEvent>(events);
     }
 
-    private void AdvanceWeek()
+    private async void AdvanceWeek()
     {
-        _gameService.ProcessNextWeek();
-        var state = _gameService.GetGameState();
-        CurrentYear = state.CurrentYear;
-        CurrentWeek = state.CurrentWeek;
-        UpdateWeeklyEvents();
+        try
+        {
+            _gameService.ProcessNextWeek();
+            var state = _gameService.GetGameState();
+            CurrentYear = state.CurrentYear;
+            CurrentWeek = state.CurrentWeek;
+            UpdateWeeklyEvents();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Navigation failed: {ex.ToString()}");
+            await Shell.Current.DisplayAlert("Error",
+                $"Couldn't open team: {ex.Message}",
+                "OK");
+        }
     }
 }
 

@@ -11,6 +11,7 @@
             <Label Text="{Binding Team.Name}" FontSize="24" FontAttributes="Bold" />
             <Label Text="{Binding Team.WorldRanking, StringFormat='World Ranking: #{0}'}" />
             <Label Text="{Binding Team.Budget, StringFormat='Budget: ${0:N0}'}" />
+            <Label Text="{Binding Team.WeeklyExpense, StringFormat='Expense: ${0:N0}'}" />
         </VerticalStackLayout>
 
         <!-- Players -->
@@ -19,26 +20,27 @@
                 <CollectionView.ItemTemplate>
                     <DataTemplate>
                         <Grid Padding="10">
-                            <!--<Image Grid.Column="0" Source="{Binding Nationality, Converter={StaticResource NationalityToFlagConverter}}" 
-                                   WidthRequest="40" HeightRequest="30" Aspect="AspectFill" />-->
                             <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="70"/>
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="90"/>
                                 <ColumnDefinition Width="90"/>
                             </Grid.ColumnDefinitions>
 
-                            <VerticalStackLayout Grid.Column="1" Spacing="2">
+                            <Image Grid.Column="0" Source="{Binding Nationality, Converter={StaticResource NationalityToFlagConverter}}" 
+                                   WidthRequest="40" HeightRequest="30" Aspect="AspectFill" />
+                            <VerticalStackLayout Grid.Column="2" Spacing="2">
                                 <Label Text="{Binding FullName}" FontAttributes="Bold" />
                                 <Label Text="{Binding Role}" FontSize="14" />
                                 <Label Text="{Binding Stats.Rating, StringFormat='Rating: {0:F2}'}" FontSize="12" />
                             </VerticalStackLayout>
 
-                            <Button Grid.Column="2" Text="Bench" 
+                            <Button Grid.Column="3" Text="Bench" 
                                     Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:TeamViewModel}}, Path=BenchPlayerCommand}" 
                                     CommandParameter="{Binding .}" 
                                     FontSize="12" Padding="6"/>
-                            <Button Grid.Column="3" Text="Release" 
+                            <Button Grid.Column="4" Text="Release" 
                                     Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:TeamViewModel}}, Path=ReleasePlayerCommand}" 
                                     CommandParameter="{Binding .}" 
                                     BackgroundColor="Red" TextColor="White"
@@ -55,18 +57,34 @@
             <CollectionView ItemsSource="{Binding BenchPlayers}" SelectionMode="Single" SelectedItem="{Binding SelectedPlayer}">
                 <CollectionView.ItemTemplate>
                     <DataTemplate>
-                        <Grid Padding="10" ColumnDefinitions="Auto,*,Auto">
-                            <!--<Image Grid.Column="0" Source="{Binding Nationality, Converter={StaticResource NationalityToFlagConverter}}" 
-                                   WidthRequest="40" HeightRequest="30" Aspect="AspectFill" />-->
+                        <Grid Padding="10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="70"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="90"/>
+                                <ColumnDefinition Width="90"/>
+                            </Grid.ColumnDefinitions>
+                            <Image Grid.Column="0" Source="{Binding Nationality, Converter={StaticResource NationalityToFlagConverter}}" 
+                                   WidthRequest="40" HeightRequest="30" Aspect="AspectFill" />
 
-                            <VerticalStackLayout Grid.Column="1" Spacing="2">
+                            <VerticalStackLayout Grid.Column="2" Spacing="2">
                                 <Label Text="{Binding FullName}" FontAttributes="Bold" />
                                 <Label Text="{Binding Role}" FontSize="14" />
                                 <Label Text="{Binding Stats.Rating, StringFormat='Rating: {0:F2}'}" FontSize="12" />
                             </VerticalStackLayout>
 
-                            <Button Grid.Column="2" Text="Activate" Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:TeamViewModel}}, Path=ActivatePlayerCommand}" 
-                                    CommandParameter="{Binding .}" />
+                            <!--<Button Grid.Column="3" Text="Activate" Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:TeamViewModel}}, Path=ActivatePlayerCommand}" 
+                                    CommandParameter="{Binding .}" />-->
+                            <Button Grid.Column="3" Text="Activate" 
+                                Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:TeamViewModel}}, Path=ActivatePlayerCommand}" 
+                                CommandParameter="{Binding .}" 
+                                FontSize="12" Padding="6"/>
+                            <Button Grid.Column="4" Text="Release" 
+                                Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:TeamViewModel}}, Path=ReleasePlayerCommand}" 
+                                CommandParameter="{Binding .}" 
+                                BackgroundColor="Red" TextColor="White"
+                                FontSize="12" Padding="6"/>
                         </Grid>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>

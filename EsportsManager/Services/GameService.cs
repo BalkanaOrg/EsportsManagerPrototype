@@ -1,17 +1,41 @@
 ﻿// GameService.cs
 using EsportsManager.Models;
 using System.Collections.ObjectModel;
+using System.Security.Principal;
 
 public class GameService
 {
     private GameState _gameState;
     private Random random = new Random();
+
     private readonly List<string> _nationalities = new()
     {
         "Germany", "Bulgaria", "UK", "France", "Spain", "Italy", "Sweden", "Denmark", "Norway", "Finland",
         "Russia", "Ukraine", "Poland", "Turkey", "Brazil", "USA", "Canada", "China", "South Korea", "Australia",
         "Netherlands", "Kazakhstan", "Serbia", "Romania", "Greece", "Albania", "Kosovo", "Mexico", "Argentina",
-        "Columbia", "South Africa", "India", "Japan"
+        "Columbia", "South Africa", "India", "Japan", "Mongolia", "Vietnam", "Indonesia", "Philippines"
+    };
+
+    private readonly List<string> _EU = new()
+    {
+        "Germany", "Bulgaria", "UK", "France", "Spain", "Italy", "Sweden", "Denmark", "Norway", "Finland",
+        "Russia", "Ukraine", "Poland", "Turkey", "Netherlands", "Kazakhstan", "Serbia", "Romania", "Greece", "Albania", "Kosovo"
+    };
+
+    private readonly List<string> _AM = new()
+    {
+        "Brazil", "USA", "Canada", "Mexico", "Argentina", "Columbia"
+    };
+
+    private readonly List<string> _AS = new()
+    {
+        "China", "South Korea", "Australia", "South Africa", "India", "Japan", "Mongolia", "Vietnam", "Indonesia", "Philippines"
+    };
+
+    private readonly List<Color> _teamColors = new()
+    {
+        Colors.DarkRed, Colors.Blue, Colors.Green, Colors.DarkViolet, Colors.Purple, Colors.DarkOrange, Colors.Black, Colors.DarkTurquoise, Colors.Aquamarine,
+        Colors.DarkKhaki, Colors.Cyan, Colors.Magenta, Colors.Green, Colors.DarkSeaGreen, Colors.DarkGreen,
     };
 
     public GameService()
@@ -19,30 +43,27 @@ public class GameService
         _gameState = new GameState();
     }
 
-    public void InitializeNewGame(string teamName)
+    public void InitializeNewGame(string teamName, Color color)
     {
         _gameState = new GameState();
 
         // Create user team with better starting budget
-        decimal budget = 500000;
+        decimal budget = 1000000;
         _gameState.UserTeam = new Team
         {
             Name = teamName,
-            Budget = budget // Increased starting budget
+            Budget = budget,
+            Color = color
         };
         _gameState.AllTeams.Add(_gameState.UserTeam);
         _gameState.Budget = budget;
 
-        // Generate AI teams with proper player counts
-        GenerateAITeams(50); // 16 AI teams for competition
+        GenerateAITeams(200);
 
-        // Generate quality free agents
-        GenerateFreeAgents(130); // 75 free agents
+        GenerateFreeAgents(130);
 
-        // Generate balanced initial tournaments
         GenerateInitialTournaments();
 
-        // Ensure user team gets into some tournaments
         AssignInitialTournamentParticipation();
     }
 
@@ -59,7 +80,8 @@ public class GameService
                 //Bench = new List<Player>(),
                 Players = new ObservableCollection<Player>(),
                 Bench = new ObservableCollection<Player>(),
-                MatchHistory = new List<MatchHistory>()
+                MatchHistory = new List<MatchHistory>(),
+                Color = _teamColors[random.Next(_teamColors.Count)],
             };
 
             // Generate 5 main + 2 bench players
@@ -73,6 +95,7 @@ public class GameService
             }
 
             _gameState.AllTeams.Add(aiTeam);
+            DefineTeamRegion(aiTeam);
         }
     }
     private Player GeneratePlayerForTeam(int teamId, bool isStarPlayer)
@@ -102,6 +125,7 @@ public class GameService
     {
         var existingIds = _gameState.ActiveTournaments
             .Concat(_gameState.CompletedTournaments)
+            .Concat(_gameState.UpcomingTournaments)
             .Select(t => t.Id)
             .ToList();
 
@@ -110,10 +134,11 @@ public class GameService
         int maxId = existingIds.Max();
         int nextId = maxId + 1;
 
-        while(existingIds.Contains(nextId))
+        while (existingIds.Contains(nextId))
         {
             nextId++;
         }
+
         Console.WriteLine($"Generated new tournament ID: {nextId}");
         return nextId;
     }
@@ -151,39 +176,86 @@ public class GameService
 
     private void GenerateInitialTournaments()
     {
-        _gameState.ActiveTournaments = new List<Tournament>();
+        //Major
+        _gameState.UpcomingTournaments = new List<Tournament>();
         int currentYear = _gameState.CurrentYear;
 
-        // Major Tournament (16 teams)
         var major = CreateTournament(
-            $"{GetCityName()} - {currentYear} Major",
-            TournamentTier.Major,
-            1000000,
-            currentYear,
-            10,
-            3,
-            32
+            name: $"{GetCityName()} - {currentYear} Major",
+            tier: TournamentTier.Major,
+            prizePool: 3000000,
+            year: currentYear,
+            startWeek: 15,
+            durationWeeks: 3,
+            teamCount: 32,
+            format: TournamentFormat.SingleElimination
         );
-        _gameState.ActiveTournaments.Add(major);
+        major.CurrentStage = "Round of 32";
+        _gameState.UpcomingTournaments.Add(major);
 
-        // Regular Tournaments (8 teams each)
+
+        //Major RMR
+        var rmr = CreateTournament(
+            name: $"{major.Name} - {currentYear} RMR",
+            tier: TournamentTier.RMR,
+            prizePool: 1000000,
+            year: currentYear,
+            startWeek: major.Week-5,
+            durationWeeks: 2,
+            teamCount: 32,
+            format: TournamentFormat.SingleElimination
+        );
+        rmr.CurrentStage = "Round of 32";
+        _gameState.UpcomingTournaments.Add(rmr);
+
+        //Random S-tier tournaments
         for (int i = 1; i <= 12; i++)
         {
             var tournament = CreateTournament(
-                $"{GetTournamentName()} {currentYear} {i}",
-                TournamentTier.A,
-                250000,
-                currentYear,
-                2 + (i * 3),
-                2,
-                16
+                name: $"{GetTournamentName()} {currentYear} {i}",
+                tier: TournamentTier.S,
+                prizePool: 250000,
+                year: currentYear,
+                startWeek: 2 + (i * 3),
+                durationWeeks: 2,
+                teamCount: 16,
+                format: TournamentFormat.RoundRobin
             );
-            _gameState.ActiveTournaments.Add(tournament);
+            tournament.CurrentStage = "Group Stage";
+            tournament.TeamsPerGroup = 4; // 4 groups of 4 teams
+            tournament.TeamsAdvancingPerGroup = 2; // Top 2 from each group advance
+            _gameState.UpcomingTournaments.Add(tournament);
+        }
+
+        for(int i = 1; i<=2; i++)
+        {
+            var tournament = CreateTournament(
+                name: $"ESL Pro League {currentYear} {i}",
+                tier: TournamentTier.A,
+                prizePool: 1000000,
+                year: currentYear,
+                startWeek: 20 * i,
+                durationWeeks: 4,
+                teamCount: 32,
+                format: TournamentFormat.RoundRobin
+                );
+            tournament.CurrentStage = "Group Stage";    
+            tournament.TeamsPerGroup = 8;
+            tournament.TeamsAdvancingPerGroup = 2;
+            _gameState.UpcomingTournaments.Add(tournament);
         }
     }
 
-    private Tournament CreateTournament(string name, TournamentTier tier, int prizePool,
-                                      int year, int week, int duration, int teamCount)
+    // Updated CreateTournament method signature
+    private Tournament CreateTournament(
+        string name,
+        TournamentTier tier,
+        int prizePool,
+        int year,
+        int startWeek,
+        int durationWeeks,
+        int teamCount,
+        TournamentFormat format)
     {
         var tournament = new Tournament
         {
@@ -192,10 +264,12 @@ public class GameService
             Tier = tier,
             PrizePool = prizePool,
             Year = year,
-            Week = week,
-            DurationWeeks = duration,
+            Week = startWeek,
+            DurationWeeks = durationWeeks,
             ParticipatingTeams = new List<Team>(),
             Matches = new List<Match>(),
+            GroupStages = new List<GroupStage>(),
+            Format = format,
             IsCompleted = false
         };
 
@@ -212,9 +286,23 @@ public class GameService
         }
 
         tournament.ParticipatingTeams = participants;
+
+        // Generate appropriate matches based on format
+        switch (format)
+        {
+            case TournamentFormat.SingleElimination:
+                GenerateSingleEliminationMatches(tournament);
+                break;
+            case TournamentFormat.RoundRobin:
+                GenerateRoundRobinMatches(tournament);
+                break;
+                // Add cases for other formats as needed
+        }
+
         return tournament;
     }
 
+    
     private void AssignInitialTournamentParticipation()
     {
         foreach (var tournament in _gameState.ActiveTournaments)
@@ -261,7 +349,7 @@ public class GameService
         // Majors (2 per year)
         for (int i = 0; i < 2; i++)
         {
-            _gameState.ActiveTournaments.Add(new Tournament
+            _gameState.UpcomingTournaments.Add(new Tournament
             {
                 Id = GetNextTournamentId(),
                 Name = $"{GetCityName()} - {year} Major",
@@ -276,7 +364,7 @@ public class GameService
         // Tier A tournaments (6 per year)
         for (int i = 0; i < 6; i++)
         {
-            _gameState.ActiveTournaments.Add(new Tournament
+            _gameState.UpcomingTournaments.Add(new Tournament
             {
                 Id = GetNextTournamentId(),
                 Name = $"{GetTournamentName()} {year}",
@@ -331,8 +419,16 @@ public class GameService
             player.IsBenched = true;
         }
         _gameState.WeeklyExpense += player.Salary;
+        team.WeeklyExpense += player.Salary;
         player.CurrentTeamId = team.Id;
         team.Budget -= player.Buyout;
+    }
+
+    public async Task<Team> GetTeamByIdAsync(int teamId)
+    {
+        // Fetch team by ID from your data source, such as an API or database
+        var team = _gameState.AllTeams.FirstOrDefault(t => t.Id == teamId);
+        return team;
     }
 
     public void ReleasePlayer(Player player)
@@ -340,6 +436,8 @@ public class GameService
         var team = _gameState.AllTeams.FirstOrDefault(t => t.Id == player.CurrentTeamId);
         if (team != null)
         {
+            team.WeeklyExpense -= player.Salary;
+            _gameState.WeeklyExpense -= player.Salary;
             team.Players.Remove(player);
             team.Bench.Remove(player);
             player.CurrentTeamId = 0;
@@ -369,15 +467,30 @@ public class GameService
             player.IsBenched = false;
         }
     }
+    public void MoveToActive(Tournament t)
+    {
+        var tournament = _gameState.UpcomingTournaments.FirstOrDefault(t=>t.Id == t.Id);
+        if(tournament!=null && !(_gameState.ActiveTournaments.Contains(tournament)))
+        {
+            _gameState.ActiveTournaments.Add(tournament);
+            _gameState.UpcomingTournaments.Remove(tournament);
+        }
+    }
 
     public void ProcessNextWeek()
     {
+        _gameState.ActiveTournaments = _gameState.UpcomingTournaments
+            .Where(t => t.Year == _gameState.CurrentYear &&
+                        t.Week <= _gameState.CurrentWeek &&
+                        (t.Week + t.DurationWeeks) > _gameState.CurrentWeek)
+            .ToList();
+        _gameState.UpcomingTournaments.RemoveAll(t => _gameState.ActiveTournaments.Contains(t));
         // Process all tournaments that are active this week
         var currentTournaments = _gameState.ActiveTournaments
-        .Where(t => t.Year == _gameState.CurrentYear &&
-                    t.Week <= _gameState.CurrentWeek &&
-                    (t.Week + t.DurationWeeks) > _gameState.CurrentWeek)
-        .ToList(); // <- to avoid modifying during loop
+            .Where(t => t.Year == _gameState.CurrentYear &&
+                        t.Week <= _gameState.CurrentWeek &&
+                        (t.Week + t.DurationWeeks) > _gameState.CurrentWeek)
+            .ToList();
 
         foreach (var tournament in currentTournaments)
         {
@@ -401,59 +514,238 @@ public class GameService
 
     private void ProcessTournamentWeek(Tournament tournament)
     {
-        // For simplicity, we'll just generate matches for this week
-        // In a real implementation, you'd have a more sophisticated tournament structure
+        if (tournament.IsCompleted) return;
 
-        if (tournament.Matches.Count == 0)
+        // Process group stage matches first if they exist
+        if (tournament.HasGroupStage)
         {
-            // Generate initial matches for the tournament
-            GenerateInitialMatches(tournament);
-        }
-        else
-        {
-            // Process next round of matches
-            GenerateNextRoundMatches(tournament);
+            ProcessGroupStageMatches(tournament);
+            ProcessGroupStage(tournament);
         }
 
-        // Play matches for this week
-        foreach (var match in tournament.Matches
-            .Where(m => !m.IsCompleted &&
-                       m.MatchDate.Year == _gameState.CurrentYear &&
-                       m.MatchDate.DayOfYear / 7 + 1 == _gameState.CurrentWeek))
+        // Then process playoff matches
+        ProcessPlayoffMatches(tournament);
+
+        // Check if tournament is complete
+        if (tournament.Matches.Any() &&
+            tournament.Matches.All(m => m.IsCompleted) &&
+            !tournament.IsCompleted)
         {
-            PlayMatch(match);
+            CompleteTournament(tournament);
+        }
+    }
+
+    private void ProcessGroupStage(Tournament tournament)
+    {
+        if (!tournament.HasGroupStage) return;
+
+        foreach (var group in tournament.GroupStages)
+        {
+            group.CalculateStandings();
         }
 
-        // Check if tournament is completed
-        if (tournament.Matches.All(m => m.IsCompleted) && !tournament.IsCompleted)
-        {
-            tournament.IsCompleted = true;
-            tournament.Winner = DetermineTournamentWinner(tournament);
-            _gameState.ActiveTournaments.Remove(tournament);
-            _gameState.CompletedTournaments.Add(tournament);
+        bool allGroupsComplete = tournament.GroupStages
+            .All(g => g.Matches.All(m => m.IsCompleted));
 
-            // Distribute prize money
-            DistributePrizeMoney(tournament);
+        if (allGroupsComplete && !tournament.Matches.Any())
+        {
+            GeneratePlayoffMatches(tournament);
         }
+    }
+
+    private void GenerateRoundRobinMatches(Tournament tournament)
+    {
+        tournament.Matches.Clear();
+        tournament.GroupStages.Clear();
+
+        // Determine group configuration
+        int teamCount = tournament.ParticipatingTeams.Count;
+        int groupSize = teamCount switch
+        {
+            < 16 => 4,  // 4 teams per group for small tournaments
+            < 32 => 8,  // 8 teams per group for medium tournaments
+            _ => 16    // 16 teams per group for large tournaments
+        };
+
+        int groupCount = (int)Math.Ceiling((double)teamCount / groupSize);
+
+        // Create groups
+        var shuffledTeams = tournament.ParticipatingTeams
+            .OrderBy(t => Guid.NewGuid())
+            .ToList();
+
+        for (int i = 0; i < groupCount; i++)
+        {
+            var group = new GroupStage
+            {
+                Name = $"Group {(char)('A' + i)}",
+                Teams = shuffledTeams.Skip(i * groupSize).Take(groupSize).ToList()
+            };
+
+            GenerateRoundRobinMatchesForGroup(group);
+            tournament.GroupStages.Add(group);
+        }
+
+        tournament.TeamsPerGroup = groupSize;
+        tournament.TeamsAdvancingPerGroup = Math.Max(2, groupSize / 2);
+    }
+
+    private void GenerateRoundRobinMatchesForGroup(GroupStage group)
+    {
+        for (int i = 0; i < group.Teams.Count; i++)
+        {
+            for (int j = i + 1; j < group.Teams.Count; j++)
+            {
+                group.Matches.Add(new Match
+                {
+                    Team1 = group.Teams[i],
+                    Team2 = group.Teams[j],
+                    Stage = group.Name,
+                    MatchDate = CalculateGroupStageMatchDate(group.Name, i, j),
+                    IsDeciderMatch = false
+                });
+            }
+        }
+    }
+
+    private double CalculateMomentumFactor(Team team1, Team team2)
+    {
+        var team1Recent = GetRecentWins(team1, 5);
+        var team2Recent = GetRecentWins(team2, 5);
+        var headToHead = GetHeadToHeadRecord(team1, team2);
+
+        // Calculate momentum (1.0 = neutral)
+        double momentum = 1.0;
+        momentum += (team1Recent.Wins - team2Recent.Wins) * 0.05;
+        momentum += (headToHead.Team1Wins - headToHead.Team2Wins) * 0.03;
+
+        return Math.Clamp(momentum, 0.8, 1.2);
+    }
+
+
+    private void AdvanceTournamentStage(Tournament tournament)
+    {
+        switch (tournament.Format)
+        {
+            case TournamentFormat.SingleElimination:
+                AdvanceSingleElimination(tournament);
+                break;
+
+                // Implement other formats similarly
+        }
+    }
+
+    private void AdvanceSingleElimination(Tournament tournament)
+    {
+        string currentStage = tournament.CurrentStage;
+
+        var currentWinners = tournament.Matches
+            .Where(m => m.Stage == currentStage)
+            .Select(m => m.Winner)
+            .ToList();
+
+        if (currentWinners.Count == 1)
+        {
+            CompleteTournament(tournament);
+            return;
+        }
+
+        string nextStage = GetNextStage(currentStage);
+
+        for (int i = 0; i < currentWinners.Count; i += 2)
+        {
+            if (i + 1 < currentWinners.Count)
+            {
+                tournament.Matches.Add(new Match
+                {
+                    Team1 = currentWinners[i],
+                    Team2 = currentWinners[i + 1],
+                    Tournament = tournament,
+                    MatchDate = CalculateMatchDate(tournament, GetStageNumber(nextStage)),
+                    Stage = nextStage,
+                    IsDeciderMatch = (nextStage == "Grand Final")
+                });
+            }
+            else
+            {
+                // Handle odd number of winners (shouldn't happen in single elim)
+                currentWinners[i].Budget += tournament.PrizePool * 0.05m;
+            }
+        }
+
+        tournament.CurrentStage = nextStage;
+    }
+
+    private int GetStageRoundNumber(string stage)
+    {
+        if (stage.StartsWith("Round of"))
+        {
+            // Extract the number from the stage name
+            if (int.TryParse(stage.Replace("Round of", "").Trim(), out int number))
+            {
+                return number;
+            }
+        }
+        else if (stage == "Semifinals")
+        {
+            return 4;
+        }
+        else if (stage == "Final" || stage == "Grand Final")
+        {
+            return 2;
+        }
+
+        return 0; // fallback
+    }
+
+    private int GetStageNumber(string stage)
+    {
+        return stage switch
+        {
+            "Round of 64" => 1,
+            "Round of 32" => 2,
+            "Round of 16" => 3,
+            "Quarterfinals" => 4,
+            "Semifinals" => 5,
+            "Grand Final" => 6,
+            _ => 1 // Default to first stage
+        };
+    }
+
+    private string GetNextStage(string currentStage)
+    {
+        return currentStage switch
+        {
+            "Round of 64" => "Round of 32",
+            "Round of 32" => "Round of 16",
+            "Round of 16" => "Quarterfinals",
+            "Quarterfinals" => "Semifinals",
+            "Semifinals" => "Grand Final",
+            _ => "Finals"
+        };
     }
 
     private void GenerateInitialMatches(Tournament tournament)
     {
-        // Simple implementation - just pair teams randomly
-        var teams = tournament.ParticipatingTeams.OrderBy(t => Guid.NewGuid()).ToList();
+        tournament.Matches.Clear();
 
-        for (int i = 0; i < teams.Count; i += 2)
+        switch (tournament.Format)
         {
-            if (i + 1 < teams.Count)
-            {
-                tournament.Matches.Add(new Match
-                {
-                    Team1 = teams[i],
-                    Team2 = teams[i + 1],
-                    Tournament = tournament,
-                    MatchDate = new DateTime(_gameState.CurrentYear, 1, 1).AddDays((_gameState.CurrentWeek - 1) * 7)
-                });
-            }
+            case TournamentFormat.SingleElimination:
+                GenerateSingleEliminationMatches(tournament);
+                break;
+
+            case TournamentFormat.DoubleElimination:
+                GenerateDoubleEliminationMatches(tournament);
+                break;
+
+            case TournamentFormat.RoundRobin:
+                GenerateRoundRobinMatches(tournament);
+                break;
+
+            case TournamentFormat.Swiss:
+                GenerateSwissMatches(tournament);
+                break;
         }
     }
     private void GenerateNextRoundMatches(Tournament tournament)
@@ -490,55 +782,72 @@ public class GameService
 
     private void PlayMatch(Match match)
     {
+        if (match.Team2 == null) return; // Bye match
+
         double team1Strength = CalculateTeamStrength(match.Team1);
         double team2Strength = CalculateTeamStrength(match.Team2);
 
-        // Add realistic randomness (0.7 to 1.3 multiplier)
-        team1Strength *= (random.NextDouble() * 0.6) + 0.7;
-        team2Strength *= (random.NextDouble() * 0.6) + 0.7;
+        // Apply map-specific adjustments (you could add map property to Match)
+        team1Strength *= GetMapPerformanceFactor(match.Team1, "de_dust2");
+        team2Strength *= GetMapPerformanceFactor(match.Team2, "de_dust2");
 
-        // Best of 1 (MR15)
-        int team1Rounds = (int)(16 * (team1Strength / (team1Strength + team2Strength)));
+        // Add realistic randomness and momentum
+        double momentumFactor = CalculateMomentumFactor(match.Team1, match.Team2);
+        team1Strength *= momentumFactor;
+        team2Strength *= (2 - momentumFactor); // Inverse for other team
+
+        // Add clutch factor for close matches
+        double clutchFactor = 1 + (random.NextDouble() * 0.2 - 0.1); // ±10%
+
+        // Calculate round scores (MR15)
+        int team1Rounds = (int)(16 * (team1Strength / (team1Strength + team2Strength)) * clutchFactor);
         int team2Rounds = 16 - team1Rounds;
 
-        // Ensure at least 1 round difference
+        // Ensure minimum 1 round difference
         if (team1Rounds == team2Rounds)
         {
             if (random.Next(2) == 0) team1Rounds++;
             else team2Rounds++;
         }
 
-        match.Team1Score = team1Rounds;
-        match.Team2Score = team2Rounds;
+        match.Team1Score = Math.Min(16, team1Rounds);
+        match.Team2Score = Math.Min(16, team2Rounds);
         match.IsCompleted = true;
+        match.Winner = team1Rounds > team2Rounds ? match.Team1 : match.Team2;
 
-        // Enhanced player performance generation
-        GenerateRealisticPlayerPerformances(match);
-
-        _gameState.CompletedMatches.Add(match);
+        GeneratePlayerPerformances(match);
+        UpdateTeamMomentum(match);
     }
 
-    private double CalculateTeamStrength(Team team)
+    private void UpdateTeamMomentum(Match match)
     {
-        if (team.Players.Count == 0) return 0;
-
-        double totalStrength = 0;
-        int count = 0;
-
-        foreach (var player in team.Players)
-        {
-            double playerStrength = player.Stats.Rating;
-
-            // Boost for team synergy
-            if (team.Players.Count >= 3)
-                playerStrength *= 1.1;
-
-            totalStrength += playerStrength;
-            count++;
-        }
-
-        return totalStrength / count;
+        // Winner gains momentum, loser loses some
+        match.Winner.Momentum = Math.Min(1.2, match.Winner.Momentum * 1.05);
+        Team loser = match.Winner == match.Team1 ? match.Team2 : match.Team1;
+        loser.Momentum = Math.Max(0.8, loser.Momentum * 0.95);
     }
+
+    //private double CalculateTeamStrength(Team team)
+    //{
+    //    if (team.Players.Count == 0) return 0;
+
+    //    double totalStrength = 0;
+    //    int count = 0;
+
+    //    foreach (var player in team.Players)
+    //    {
+    //        double playerStrength = player.Stats.Rating;
+
+    //        // Boost for team synergy
+    //        if (team.Players.Count >= 3)
+    //            playerStrength *= 1.1;
+
+    //        totalStrength += playerStrength;
+    //        count++;
+    //    }
+
+    //    return totalStrength / count;
+    //}
 
     private void GenerateRealisticPlayerPerformances(Match match)
     {
@@ -614,45 +923,45 @@ public class GameService
         }
     }
 
-    private void UpdateTeamRankings()
-    {
-        // Get all completed matches across all tournaments
-        var allMatches = _gameState.ActiveTournaments
-            .Concat(_gameState.CompletedTournaments)
-            .SelectMany(t => t.Matches)
-            .Where(m => m.IsCompleted)
-            .ToList();
+    //public void UpdateTeamRankings()
+    //{
+    //    // Get all completed matches across all tournaments
+    //    var allMatches = _gameState.ActiveTournaments
+    //        .Concat(_gameState.CompletedTournaments)
+    //        .SelectMany(t => t.Matches)
+    //        .Where(m => m.IsCompleted)
+    //        .ToList();
 
-        // Calculate team rankings
-        var teamsWithScores = _gameState.AllTeams.Select(team =>
-        {
-            // Get all matches where this team participated
-            var teamMatches = allMatches
-                .Where(m => m.Team1 == team || m.Team2 == team)
-                .ToList();
+    //    // Calculate team rankings
+    //    var teamsWithScores = _gameState.AllTeams.Select(team =>
+    //    {
+    //        // Get all matches where this team participated
+    //        var teamMatches = allMatches
+    //            .Where(m => m.Team1 == team || m.Team2 == team)
+    //            .ToList();
 
-            // Calculate points (3 for win, 1 for loss)
-            int points = teamMatches.Sum(m =>
-                m.Winner == team ? 3 : 1);
+    //        // Calculate points (3 for win, 1 for loss)
+    //        int points = teamMatches.Sum(m =>
+    //            m.Winner == team ? 3 : 1);
 
-            return new
-            {
-                Team = team,
-                Points = points,
-                Wins = teamMatches.Count(m => m.Winner == team),
-                Losses = teamMatches.Count(m => m.Winner != team)
-            };
-        })
-        .OrderByDescending(t => t.Points)
-        .ThenByDescending(t => t.Wins)
-        .ToList();
+    //        return new
+    //        {
+    //            Team = team,
+    //            Points = points,
+    //            Wins = teamMatches.Count(m => m.Winner == team),
+    //            Losses = teamMatches.Count(m => m.Winner != team)
+    //        };
+    //    })
+    //    .OrderByDescending(t => t.Points)
+    //    .ThenByDescending(t => t.Wins)
+    //    .ToList();
 
-        // Assign rankings
-        for (int i = 0; i < teamsWithScores.Count; i++)
-        {
-            teamsWithScores[i].Team.WorldRanking = i + 1;
-        }
-    }
+    //    // Assign rankings
+    //    for (int i = 0; i < teamsWithScores.Count; i++)
+    //    {
+    //        teamsWithScores[i].Team.WorldRanking = i + 1;
+    //    }
+    //}
 
     public void VerifyGameState()
     {
@@ -706,14 +1015,372 @@ public class GameService
             .ToList();
     }
 
-    public Tournament GetTournamentById(int tournamentId)
+    public Tournament? GetTournamentById(int tournamentId)
     {
-        // Search in active tournaments first
-        var tournament = _gameState.ActiveTournaments
+        return _gameState.ActiveTournaments
+            .Concat(_gameState.UpcomingTournaments)
             .Concat(_gameState.CompletedTournaments)
             .FirstOrDefault(t => t.Id == tournamentId);
+    }
 
-        return tournament;
+    public void UpdateTeamRankings()
+    {
+        var allTeams = _gameState.AllTeams;
+        var allMatches = GetAllCompletedMatches();
+
+        // Calculate team scores with the new algorithm
+        var teamScores = allTeams.Select(team =>
+        {
+            double compositionScore = CalculateTeamCompositionScore(team);
+            double strengthScore = CalculateTeamStrength(team);
+            double performanceScore = CalculateRecentPerformance(team, allMatches);
+
+            return new
+            {
+                Team = team,
+                TotalScore = compositionScore * strengthScore * performanceScore
+            };
+        })
+        .OrderByDescending(t => t.TotalScore)
+        .ToList();
+
+        // Assign rankings based on the new scores
+        for (int i = 0; i < teamScores.Count; i++)
+        {
+            teamScores[i].Team.WorldRanking = i + 1;
+            teamScores[i].Team.TeamScore = teamScores[i].TotalScore; // Store for reference
+        }
+    }
+
+    private List<Match> GetAllCompletedMatches()
+    {
+        return _gameState.ActiveTournaments
+            .Concat(_gameState.CompletedTournaments)
+            .SelectMany(t => t.Matches)
+            .Where(m => m.IsCompleted)
+            .ToList();
+    }
+
+    private double CalculateTeamCompositionScore(Team team)
+    {
+        // Check for required roles
+        var roles = team.Players.Select(p => p.Role).ToList();
+
+        bool hasRifler = roles.Contains(PlayerRole.Rifler);
+        bool hasAWPer = roles.Contains(PlayerRole.AWPer);
+        bool hasIGL = roles.Contains(PlayerRole.IGL);
+        bool hasSupport = roles.Contains(PlayerRole.Support);
+        bool hasLurker = roles.Contains(PlayerRole.Lurker);
+
+        // Base composition score (1.0 = perfect composition)
+        double compositionScore = 1.0;
+
+        // Apply penalties for missing roles
+        if (!hasRifler) compositionScore *= 0.85;
+        if (!hasAWPer) compositionScore *= 0.80;
+        if (!hasIGL) compositionScore *= 0.70; // IGL is very important
+        if (!hasSupport) compositionScore *= 0.90;
+        if (!hasLurker) compositionScore *= 0.95;
+
+        // Bonus for having all roles
+        if (hasRifler && hasAWPer && hasIGL && hasSupport && hasLurker)
+            compositionScore *= 1.10;
+
+        return compositionScore;
+    }
+
+    private double CalculateTeamStrength(Team team)
+    {
+        if (team.Players.Count == 0) return 0;
+
+        double totalStrength = 0;
+        double roleSynergyBonus = 1.0;
+        var roles = team.Players.Select(p => p.Role).ToList();
+
+        foreach (var player in team.Players)
+        {
+            double playerStrength = player.Stats.Rating;
+
+            switch (player.Role)
+            {
+                case PlayerRole.IGL:
+                    playerStrength *= 1 + (player.Stats.GameSense * 0.05);
+                    break;
+                case PlayerRole.AWPer:
+                    playerStrength *= 1 + (player.Stats.Aim * 0.03 - player.Stats.Reflexes * 0.01);
+                    break;
+                case PlayerRole.Support:
+                    playerStrength *= 1 + (player.Stats.Teamwork * 0.04);
+                    break;
+                case PlayerRole.Lurker:
+                    playerStrength *= 1 + (player.Stats.Consistency * 0.04);
+                    break;
+                case PlayerRole.Rifler:
+                    playerStrength *= 1 + (player.Stats.Aim * 0.04);
+                    break;
+            }
+
+            totalStrength += playerStrength;
+        }
+
+        // Synergy bonuses
+        if (roles.Contains(PlayerRole.IGL) && roles.Contains(PlayerRole.Support))
+            roleSynergyBonus *= 1.15;
+
+        if (roles.Count(r => r == PlayerRole.Rifler) >= 2)
+            roleSynergyBonus *= 1.05;
+
+        double averageStrength = totalStrength / team.Players.Count;
+        return averageStrength * roleSynergyBonus;
+    }
+
+    private double CalculateRecentPerformance(Team team, List<Match> allMatches)
+    {
+        var teamMatches = allMatches
+            .Where(m => m.Team1 == team || m.Team2 == team)
+            .OrderByDescending(m => m.MatchDate)
+            .Take(10)
+            .ToList();
+
+        if (!teamMatches.Any()) return 1.0; // Neutral if no matches
+
+        int wins = 0;
+        int matches = 0;
+        double totalPerformance = 0;
+
+        foreach (var match in teamMatches)
+        {
+            bool isTeam1 = match.Team1 == team;
+            bool won = isTeam1 ? match.Team1Score > match.Team2Score : match.Team2Score > match.Team1Score;
+
+            if (won) wins++;
+            matches++;
+
+            // Calculate performance ratio (rounds won / total rounds)
+            double performance = isTeam1 ?
+                (double)match.Team1Score / (match.Team1Score + match.Team2Score) :
+                (double)match.Team2Score / (match.Team1Score + match.Team2Score);
+
+            totalPerformance += performance;
+        }
+
+        double winRate = (double)wins / matches;
+        double avgPerformance = totalPerformance / matches;
+
+        // Combine win rate and performance (60/40 weighting)
+        return (winRate * 0.6) + (avgPerformance * 0.4);
+    }
+
+    private void GenerateSingleEliminationMatches(Tournament tournament)
+    {
+        GenerateSingleEliminationMatches(tournament, tournament.ParticipatingTeams);
+    }
+
+    private void GenerateSingleEliminationMatches(Tournament tournament, List<Team> teams)
+    {
+        // Check if we need byes (when team count isn't power of 2)
+        int teamsNeeded = (int)Math.Pow(2, Math.Ceiling(Math.Log(teams.Count, 2)));
+        int byes = teamsNeeded - teams.Count;
+
+        // Create first round matches
+        for (int i = 0; i < teams.Count - byes; i += 2)
+        {
+            tournament.Matches.Add(new Match
+            {
+                Team1 = teams[i],
+                Team2 = teams[i + 1],
+                Tournament = tournament,
+                MatchDate = CalculateMatchDate(tournament, 0),
+                Stage = "Round of " + teamsNeeded,
+                IsDeciderMatch = false
+            });
+        }
+
+        // Teams with byes automatically advance
+        for (int i = 0; i < byes; i++)
+        {
+            int teamIndex = teams.Count - byes + i;
+            tournament.Matches.Add(new Match
+            {
+                Team1 = teams[teamIndex],
+                Team2 = null, // Indicates a bye
+                Tournament = tournament,
+                MatchDate = CalculateMatchDate(tournament, 0),
+                Stage = "Round of " + teamsNeeded,
+                IsDeciderMatch = false,
+                IsCompleted = true,
+                Winner = teams[teamIndex]
+            });
+        }
+
+        tournament.CurrentStage = "Round of " + teamsNeeded;
+    }
+
+    private DateTime CalculateMatchDate(Tournament tournament, int round)
+    {
+        return new DateTime(tournament.Year, 1, 1)
+            .AddDays((tournament.Week - 1) * 7)
+            .AddDays(round * 2); // Matches every 2 days during tournament
+    }
+
+    private void GenerateDoubleEliminationMatches(Tournament tournament)
+    {
+        // Implement double elimination logic
+        // Similar to single elimination but with loser's bracket
+        throw new NotImplementedException("Double elimination not yet implemented");
+    }
+
+    private void GenerateSwissMatches(Tournament tournament)
+    {
+        // Implement Swiss system pairing
+        throw new NotImplementedException("Swiss system not yet implemented");
+    }
+
+    private double GetMapPerformanceFactor(Team team, string map)
+    {
+        if (team.MapWinRates.TryGetValue(map, out double winRate))
+        {
+            return 0.8 + (winRate * 0.4); // Convert to 0.8-1.2 factor
+        }
+        return 1.0; // Neutral if no data
+    }
+
+    private void GeneratePlayerPerformances(Match match)
+    {
+        if (match.Team1 == null || match.Team2 == null) return;
+
+        foreach (var player in match.Team1.Players.Concat(match.Team2.Players))
+        {
+            double performanceFactor = (player.Stats.Rating / 2.0) * (random.NextDouble() * 0.4 + 0.8);
+
+            player.MatchHistory.Add(new MatchHistory
+            {
+                PlayerId = player.Id,
+                MatchId = match.Id,
+                Kills = (int)(15 * performanceFactor),
+                Deaths = (int)(20 * (1.3 - performanceFactor)),
+                Assists = (int)(8 * performanceFactor),
+                Rating = Math.Round(performanceFactor * 1.5, 2),
+                ADR = (int)(80 * performanceFactor),
+                FlashAssists = random.Next(0, 5),
+                EntryKills = random.Next(0, 4),
+                Map = match.Map
+            });
+        }
+    }
+
+    private (int Wins, int Losses) GetRecentWins(Team team, int matchCount)
+    {
+        var recentMatches = _gameState.CompletedMatches
+            .Where(m => (m.Team1 == team || m.Team2 == team))
+            .OrderByDescending(m => m.MatchDate)
+            .Take(matchCount)
+            .ToList();
+
+        int wins = recentMatches.Count(m => m.Winner == team);
+        return (wins, recentMatches.Count - wins);
+    }
+
+    private HeadToHeadRecord GetHeadToHeadRecord(Team team1, Team team2)
+    {
+        var matches = _gameState.CompletedMatches
+            .Where(m => (m.Team1 == team1 && m.Team2 == team2) ||
+                       (m.Team1 == team2 && m.Team2 == team1))
+            .ToList();
+
+        return new HeadToHeadRecord
+        {
+            Team1 = team1,
+            Team2 = team2,
+            Team1Wins = matches.Count(m => m.Winner == team1),
+            Team2Wins = matches.Count(m => m.Winner == team2),
+            Draws = matches.Count(m => m.Team1Score == m.Team2Score)
+        };
+    }
+
+    private void CompleteTournament(Tournament tournament)
+    {
+        tournament.IsCompleted = true;
+        tournament.Winner = tournament.Matches.LastOrDefault()?.Winner;
+
+        // Distribute prize money
+        if (tournament.Winner != null)
+        {
+            DistributePrizeMoney(tournament);
+        }
+
+        _gameState.ActiveTournaments.Remove(tournament);
+        _gameState.CompletedTournaments.Add(tournament);
+
+        // Update team rankings
+        UpdateTeamRankings();
+    }
+
+    private void ProcessGroupStageMatches(Tournament tournament)
+    {
+        foreach (var group in tournament.GroupStages)
+        {
+            foreach (var match in group.Matches.Where(m =>
+                !m.IsCompleted &&
+                ShouldPlayMatchThisWeek(m.MatchDate)))
+            {
+                PlayMatch(match);
+            }
+        }
+    }
+
+    private void ProcessPlayoffMatches(Tournament tournament)
+    {
+        foreach (var match in tournament.Matches.Where(m =>
+            !m.IsCompleted &&
+            ShouldPlayMatchThisWeek(m.MatchDate)))
+        {
+            PlayMatch(match);
+        }
+    }
+
+    private void GeneratePlayoffMatches(Tournament tournament)
+    {
+        var advancingTeams = tournament.GroupStages
+            .SelectMany(g => g.GetAdvancingTeams(tournament.TeamsAdvancingPerGroup))
+            .OrderBy(t => Guid.NewGuid()) // Randomize for bracket
+            .ToList();
+
+        GenerateSingleEliminationMatches(tournament, advancingTeams);
+    }
+
+    private DateTime CalculateGroupStageMatchDate(string groupName, int teamIndex1, int teamIndex2)
+    {
+        // Spread matches evenly across group stage duration
+        int matchIndex = (teamIndex1 * 10) + teamIndex2; // Simple hash
+        int daysOffset = matchIndex % 7; // Spread over a week
+        return new DateTime(_gameState.CurrentYear, 1, 1)
+            .AddDays((_gameState.CurrentWeek - 1) * 7)
+            .AddDays(daysOffset);
+    }
+
+    private bool ShouldPlayMatchThisWeek(DateTime matchDate)
+    {
+        return matchDate.Year == _gameState.CurrentYear &&
+               matchDate.DayOfYear / 7 + 1 == _gameState.CurrentWeek;
+    }
+
+    private void DefineTeamRegion(Team team)
+    {
+        int _eu = 0;
+        int _am = 0;
+        int _as = 0;
+        foreach (var player in team.Players)
+        {
+            if (_EU.Contains(player.Nationality))
+                _eu++;
+            else if (_AM.Contains(player.Nationality))
+                _am++;
+            else if (_AS.Contains(player.Nationality))
+                _as++;
+        }
+        team.Region = _as >= _eu && _as >= _am ? "AS" :
+                 _am >= _eu ? "AM" : "EU";
     }
 
     public decimal ReturnBudget() => _gameState.Budget;

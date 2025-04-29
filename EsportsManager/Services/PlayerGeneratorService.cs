@@ -244,8 +244,31 @@ public static class PlayerGeneratorService
             new[] { "Sato", "Suzuki", "Takahashi", "Tanaka", "Watanabe", "Ito", "Yamamoto", "Nakamura", "Kobayashi", "Kato", "Yoshida", "Yamada", "Sasaki", "Yamaguchi", "Matsumoto" },
             new[] { "Samurai", "Ninja", "Sakura", "Fuji", "Sushi", "Anime", "Shogun", "Tokyo", "Kyoto", "Daimyo", "Bushido", "Kawaii", "Oni", "Sumo", "Katana" },
             new[] { "to", "ki", "ru", "ta", "shi", "ya", "ma", "ro", "n", "su" }
+        ),
+        ["Mongolia"] = (
+            new[] { "Bat", "Bold", "Tuvshin", "Ganbaatar", "Otgonbayar", "Altan", "Chuluun", "Naran", "Sarnai", "Temujin", "Khasar", "Subotai", "Jamukha" },
+            new[] { "Khan", "Tsogt", "Bataar", "Dorj", "Nergui", "Altankhuyag", "Bayar", "Munkh", "Gantulga", "Enkh" },
+            new[] { "Steppe", "Ger", "Horse", "Eagle", "Nomad", "Gobi", "Khanate", "BlueSky", "Wolf", "Hunnu", "SilkRoad", "Altai", "Yurt" },
+            new[] { "MN", "MGL", "ia", "iin", "tai", "chuud", "khan", "jin", "gar", "uu" }
+        ),
+        ["Philippines"] = (
+            new[] { "Juan", "Jose", "Antonio", "Manuel", "Fernando", "Carlos", "Ramon", "Ricardo", "Eduardo", "Luis", "Miguel", "Alfredo", "Rodrigo" },
+            new[] { "Santos", "Reyes", "Cruz", "Bautista", "Garcia", "Aquino", "Dela Cruz", "Gonzales", "Ramos", "Torres" },
+            new[] { "Bahay", "Barangay", "Jeepney", "Adobo", "Mango", "Volcano", "Island", "Monsoon", "Pearl", "Bayan", "Maharlika", "Luzon", "Visayas" },
+            new[] { "PH", "Pinas", "ng", "ko", "han", "tay", "sil", "non", "dito", "royo" }
+        ),
+        ["Vietnam"] = (
+            new[] { "Nguyen", "Tran", "Le", "Pham", "Hoang", "Huynh", "Phan", "Vu", "Dang", "Bui", "Do", "Ho", "Ngo" },
+            new[] { "Van", "Thi", "Hong", "Minh", "Quang", "Duc", "Huu", "Thanh", "Cong", "Tuan" },
+            new[] { "Dragon", "Lotus", "Pho", "Ao Dai", "Cyclo", "Rice", "Bamboo", "Tet", "Saigon", "Halong", "Trung", "Bia Hoi", "Conical" },
+            new[] { "VN", "Viet", "Nam", "anh", "inh", "ong", "ac", "ai", "em", "ieu" }
+        ),
+        ["Indonesia"] = (
+            new[] { "Budi", "Agus", "Dwi", "Eko", "Hadi", "Joko", "Tri", "Ahmad", "Surya", "Rudi", "Adi", "Hendra", "Yanto" },
+            new[] { "Santoso", "Wijaya", "Pratama", "Setiawan", "Kurniawan", "Siregar", "Hidayat", "Saputra", "Gunawan", "Irawan" },
+            new[] { "Wayang", "Batik", "Borobudur", "Komodo", "Tempe", "Angklung", "Jamu", "Satay", "Orangutan", "Kecak", "Gamelan", "Merapi", "Nusantara" },
+            new[] { "ID", "Indo", "nesia", "wan", "to", "man", "tar", "ja", "di", "san" }
         )
-
         //[""] = (
         //    new[] { "", },
         //    new[] { "" },

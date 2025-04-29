@@ -980,3 +980,10 @@ G:\Programming\EsportsManager\EsportsManager\obj\Debug\net9.0-windows10.0.19041.
 G:\Programming\EsportsManager\EsportsManager\obj\Debug\net9.0-windows10.0.19041.0\win10-x64\resizetizer\r\za.scale-100.png
 G:\Programming\EsportsManager\EsportsManager\obj\Debug\net9.0-windows10.0.19041.0\win10-x64\resizetizer\r\zm.scale-100.png
 G:\Programming\EsportsManager\EsportsManager\obj\Debug\net9.0-windows10.0.19041.0\win10-x64\resizetizer\r\zw.scale-100.png
+G:\Programming\EsportsManager\EsportsManager\obj\Debug\net9.0-windows10.0.19041.0\win10-x64\EsportsManager.sourcelink.json
+G:\Programming\EsportsManager\EsportsManager\bin\Debug\net9.0-windows10.0.19041.0\win10-x64\a_m.scale-100.png
+G:\Programming\EsportsManager\EsportsManager\bin\Debug\net9.0-windows10.0.19041.0\win10-x64\a_s.scale-100.png
+G:\Programming\EsportsManager\EsportsManager\obj\Debug\net9.0-windows10.0.19041.0\win10-x64\resizetizer\r\a_m.scale-100.png
+G:\Programming\EsportsManager\EsportsManager\obj\Debug\net9.0-windows10.0.19041.0\win10-x64\resizetizer\r\a_s.scale-100.png
+G:\Programming\EsportsManager\EsportsManager\bin\Debug\net9.0-windows10.0.19041.0\win10-x64\e_u.scale-100.png
+G:\Programming\EsportsManager\EsportsManager\obj\Debug\net9.0-windows10.0.19041.0\win10-x64\resizetizer\r\e_u.scale-100.png

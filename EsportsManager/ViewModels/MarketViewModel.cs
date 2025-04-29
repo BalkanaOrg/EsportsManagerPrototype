@@ -94,7 +94,7 @@ namespace EsportsManager.ViewModels
         {
             if (player == null) return;
 
-            var vm = new PlayerProfileViewModel(_gameService, player);
+            var vm = new PlayerProfileViewModel(_gameService, player, false);
             var page = new PlayerProfileView { BindingContext = vm };
             await Application.Current.MainPage.Navigation.PushAsync(page);
 

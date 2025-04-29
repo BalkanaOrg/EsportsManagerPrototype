@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:converters="clr-namespace:EsportsManager.Converters"
+             xmlns:viewmodels="clr-namespace:EsportsManager.ViewModels"
+             x:Class="EsportsManager.Views.WorldRankingsPage"
+             Title="World Rankings"
+             x:Name="WorldRankingPage">
+
+    <ContentPage.Resources>
+        <converters:TeamRatingConverter x:Key="TeamRatingConverter"/>
+    </ContentPage.Resources>
+
+    <Grid RowDefinitions="Auto,Auto,*" Padding="10">
+        <!-- Search Bar -->
+        <SearchBar Grid.Row="0"
+                   Placeholder="Search teams..."
+                   Text="{Binding SearchText}"
+                   Margin="0,0,0,10"/>
+
+        <!-- Header -->
+        <Grid Grid.Row="1" ColumnDefinitions="50,*,100,100,100" Padding="10" BackgroundColor="{StaticResource Primary}">
+            <Label Text="Rank" FontAttributes="Bold" TextColor="White"/>
+            <Label Grid.Column="1" Text="Team" FontAttributes="Bold" TextColor="White"/>
+            <Label Grid.Column="2" Text="Rating" FontAttributes="Bold" TextColor="White" HorizontalOptions="End"/>
+            <Label Grid.Column="3" Text="Region" FontAttributes="Bold" TextColor="White" HorizontalOptions="End"/>
+            <Label Grid.Column="4" Text="Players" FontAttributes="Bold" TextColor="White" HorizontalOptions="End"/>
+        </Grid>
+
+        <!-- Teams List -->
+        <CollectionView Grid.Row="2" ItemsSource="{Binding RankedTeams}" SelectionMode="None">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Frame Padding="0" Margin="0,0,0,5" BackgroundColor="Transparent">
+                        <Grid Padding="10" ColumnDefinitions="50,*,100,100,100">
+                            <!-- Make the entire row clickable -->
+                            <Grid.GestureRecognizers>
+                                <TapGestureRecognizer 
+                                    Command="{Binding Source={x:Reference WorldRankingPage}, 
+                                                    Path=BindingContext.ViewTeamCommand}"
+                                    CommandParameter="{Binding .}"/>
+                            </Grid.GestureRecognizers>
+
+                            <!-- Rank -->
+                            <Label Text="{Binding WorldRanking}" 
+                                   FontSize="16"
+                                   VerticalOptions="Center"/>
+
+                            <!-- Team Name with Color -->
+                            <HorizontalStackLayout Grid.Column="1" Spacing="10" VerticalOptions="Center">
+                                <BoxView Color="{Binding Color}" WidthRequest="20" HeightRequest="20" 
+                                         CornerRadius="10" VerticalOptions="Center"/>
+                                <Label Text="{Binding Name}" FontSize="16" VerticalOptions="Center"/>
+                            </HorizontalStackLayout>
+
+                            <!-- Team Rating -->
+                            <Label Grid.Column="2" 
+                                   Text="{Binding Players, Converter={StaticResource TeamRatingConverter}}"
+                                   HorizontalOptions="End" VerticalOptions="Center"/>
+
+                            <!-- Region Flag -->
+                            <Image Source="{Binding Region, Converter={StaticResource NationalityToFlagConverter}}"
+                                   Grid.Column="3"
+                                   WidthRequest="30"
+                                   HeightRequest="20"
+                                   Aspect="AspectFit"
+                                   HorizontalOptions="End" VerticalOptions="Center"/>
+
+                            <!-- Player Count -->
+                            <Label Grid.Column="4" 
+                                   Text="{Binding Players.Count, StringFormat='{0} players'}"
+                                   HorizontalOptions="End" VerticalOptions="Center"/>
+                        </Grid>
+                    </Frame>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </Grid>
+</ContentPage>

@@ -1,0 +1,36 @@
+﻿using EsportsManager.Models;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Globalization;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace EsportsManager.Converters
+{
+    public class TierToColorConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is TournamentTier color)
+            {
+                return color switch
+                {
+                    TournamentTier.Online => Colors.LightBlue,
+                    TournamentTier.Major => Colors.Gold,
+                    TournamentTier.A => Colors.DarkGreen,
+                    TournamentTier.B => Colors.Blue,
+                    _ => Colors.White
+
+                };
+            }
+            return Colors.White;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+}

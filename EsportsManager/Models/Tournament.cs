@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel;
 
 namespace EsportsManager.Models
 {
@@ -35,6 +30,27 @@ namespace EsportsManager.Models
         protected virtual void OnPropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        public TournamentFormat Format { get; set; }
+        public List<GroupStage> GroupStages { get; set; } = new();
+        public string CurrentStage { get; set; } = "1";
+        public int TeamsPerGroup { get; set; }
+        public int TeamsAdvancingPerGroup { get; set; }
+
+        public bool HasGroupStage => GroupStages.Any();
+
+        public List<Match> AllMatches
+        {
+            get
+            {
+                var allMatches = new List<Match>(Matches);
+                foreach (var group in GroupStages)
+                {
+                    allMatches.AddRange(group.Matches);
+                }
+                return allMatches;
+            }
         }
     }
 }

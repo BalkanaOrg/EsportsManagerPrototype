@@ -1,15 +1,10 @@
 ﻿// PlayerProfileViewModel.cs
 using EsportsManager.Models;
+using System.Runtime.CompilerServices;
 using System.Windows.Input;
 
 public class PlayerProfileViewModel : BaseViewModel
 {
-
-    public bool IsOwnedByUser => Player?.CurrentTeamId == _gameService.GetGameState().UserTeam.Id;
-    public bool IsFreeAgent => Player?.CurrentTeamId == 0;
-    public bool IsTeamPlayer => !IsFreeAgent;
-    public bool IsActivePlayer => IsTeamPlayer && !Player.IsBenched;
-    public bool IsBenchedPlayer => IsTeamPlayer && Player.IsBenched;
 
     private Player _player;
 
@@ -29,28 +24,40 @@ public class PlayerProfileViewModel : BaseViewModel
             }
         }
     }
+    public bool IsSigned { get; }
+
+    public bool IsOwnedByUser => Player?.CurrentTeamId == _gameService.GetGameState().UserTeam.Id;
+    public bool IsFreeAgent => Player?.CurrentTeamId == 0;
+    public bool IsTeamPlayer => !IsFreeAgent;
+    public bool IsActivePlayer => IsTeamPlayer && !Player.IsBenched;
+    public bool IsBenchedPlayer => IsTeamPlayer && Player.IsBenched;
+
 
     public ICommand SignPlayerCommand { get; }
     public ICommand ReleasePlayerCommand { get; }
     public ICommand BenchPlayerCommand { get; }
     public ICommand ActivatePlayerCommand { get; }
 
-    public PlayerProfileViewModel(GameService gameService, Player player) : base(gameService)
+    public PlayerProfileViewModel(GameService gameService, Player player, bool isSigned) : base(gameService)
     {
-        Player = player;
+        int id = player.Id;
         var userTeam = _gameService.GetGameState().UserTeam;
-        if (player.CurrentTeamId == userTeam.Id)
+        var gameState = _gameService.GetGameState();
+
+        Player = player;
+        IsSigned = isSigned;
+        if(IsSigned)
         {
-            OnPropertyChanged(nameof(IsOwnedByUser));
+            ReleasePlayerCommand = new Command(ReleasePlayer);
+            BenchPlayerCommand = new Command(BenchPlayer);
+            ActivatePlayerCommand = new Command(ActivatePlayer);
         }
         else
         {
-            OnPropertyChanged(nameof(IsOwnedByUser));
+            SignPlayerCommand = new Command(SignPlayer);
         }
-        SignPlayerCommand = new Command(SignPlayer);
-        ReleasePlayerCommand = new Command(ReleasePlayer);
-        BenchPlayerCommand = new Command(BenchPlayer);
-        ActivatePlayerCommand = new Command(ActivatePlayer);
+            
+        
     }
 
     private async void SignPlayer()

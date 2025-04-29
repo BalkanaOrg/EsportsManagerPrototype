@@ -9,14 +9,17 @@
             <!-- Player Basic Info -->
             <Frame BorderColor="LightGray" CornerRadius="10" Padding="10" HasShadow="False">
                 <Grid ColumnDefinitions="auto, *" RowSpacing="10">
-                    <Image Source="{Binding Player.Nationality, Converter={StaticResource NationalityToFlagConverter}}"
-                       WidthRequest="80" HeightRequest="60" Aspect="AspectFill" />
 
                     <VerticalStackLayout Grid.Column="0" Spacing="4">
                         <Label Text="{Binding Player.FullName}" FontSize="24" FontAttributes="Bold" />
                         <Label Text="{Binding Player.Role}" FontSize="18" />
                         <Label Text="{Binding Player.Age, StringFormat='Age: {0}'}" FontSize="16" />
-                        <Label Text="{Binding Player.Nationality}" FontSize="16" />
+                        <HorizontalStackLayout>
+                            <Image Source="{Binding Player.Nationality, Converter={StaticResource NationalityToFlagConverter}}"
+   WidthRequest="30" HeightRequest="20" Aspect="AspectFill" />
+                            <Label Text="   " />
+                            <Label Text="{Binding Player.Nationality}" FontSize="16" />
+                        </HorizontalStackLayout>
                         <Label Text="{Binding Player.MarketValue, StringFormat='Value: ${0:N0}'}" FontSize="16" />
                         <Label Text="{Binding Player.Salary, StringFormat='Salary: ${0:N0}/week'}" FontSize="16" />
                     </VerticalStackLayout>

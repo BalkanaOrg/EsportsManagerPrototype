@@ -9,6 +9,16 @@
 
         <Entry Placeholder="Enter your team name" Text="{Binding TeamName}" />
 
-        <Button Text="Create Team" Command="{Binding CreateTeamCommand}" />
+        <VerticalStackLayout>
+            <Label Text="Pick a color!" />
+
+            <Slider Minimum="0" Maximum="255" Value="{Binding Red}" />
+            <Slider Minimum="0" Maximum="255" Value="{Binding Green}" />
+            <Slider Minimum="0" Maximum="255" Value="{Binding Blue}" />
+
+            <BoxView HeightRequest="100" Color="{Binding SelectedColor}" />
+
+            <Button Text="Create Team" Command="{Binding CreateTeamCommand}" />
+        </VerticalStackLayout>
     </VerticalStackLayout>
 </ContentPage>

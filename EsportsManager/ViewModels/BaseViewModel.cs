@@ -1,10 +1,16 @@
 ﻿// BaseViewModel.cs
+using CommunityToolkit.Mvvm.ComponentModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-public class BaseViewModel : INotifyPropertyChanged
+public partial class BaseViewModel : INotifyPropertyChanged
 {
     protected readonly GameService _gameService;
+
+    public BaseViewModel(GameService gameService)
+    {
+        _gameService = gameService;
+    }
 
     public event PropertyChangedEventHandler PropertyChanged;
 
@@ -22,10 +28,5 @@ public class BaseViewModel : INotifyPropertyChanged
         onChanged?.Invoke();
         OnPropertyChanged(propertyName);
         return true;
-    }
-
-    public BaseViewModel(GameService gameService)
-    {
-        _gameService = gameService;
     }
 }

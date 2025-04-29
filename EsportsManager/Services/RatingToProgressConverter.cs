@@ -4,8 +4,7 @@ public class RatingToProgressConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
-        if (value is double rating)
-            return rating / 2.0; // Normalize to 0-1 range
+        if (value is double rating) return rating / 2.0; // Normalize to 0-1 range
 
         return 0;
     }

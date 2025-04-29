@@ -2,6 +2,8 @@ runtimes\win-x64\native\WebView2Loader.dll
 FluentUI.cs
 OpenSans-Regular.ttf
 OpenSans-Semibold.ttf
+a_m.scale-100.png
+a_s.scale-100.png
 ad.scale-100.png
 ae.scale-100.png
 af.scale-100.png
@@ -115,6 +117,7 @@ dotnet_bot.scale-150.png
 dotnet_bot.scale-200.png
 dotnet_bot.scale-400.png
 dz.scale-100.png
+e_u.scale-100.png
 ec.scale-100.png
 ee.scale-100.png
 eg.scale-100.png

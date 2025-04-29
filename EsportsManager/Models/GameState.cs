@@ -14,7 +14,9 @@ namespace EsportsManager.Models
         public List<Team> AllTeams { get; set; } = new();
         public List<Player> FreeAgents { get; set; } = new();
         public List<Tournament> ActiveTournaments { get; set; } = new();
+        public List<Tournament> UpcomingTournaments { get; set; } = new();
         public List<Tournament> CompletedTournaments { get; set; } = new();
+        public List<Match> ActiveMatches { get; set; } = new();
         public List<Match> UpcomingMatches { get; set; } = new();
         public List<Match> CompletedMatches { get; set; } = new();
         public decimal Budget { get; set; } = 1000000;

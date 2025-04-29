@@ -98,3 +98,9 @@ build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = EsportsManager.Views.TournamentsView.xaml
 build_metadata.AdditionalFiles.TargetPath = Views\TournamentsView.xaml
 build_metadata.AdditionalFiles.RelativePath = Views\TournamentsView.xaml
+
+[G:/Programming/EsportsManager/EsportsManager/Views/WorldRankingsPage.xaml]
+build_metadata.AdditionalFiles.GenKind = Xaml
+build_metadata.AdditionalFiles.ManifestResourceName = EsportsManager.Views.WorldRankingsPage.xaml
+build_metadata.AdditionalFiles.TargetPath = Views\WorldRankingsPage.xaml
+build_metadata.AdditionalFiles.RelativePath = Views\WorldRankingsPage.xaml
