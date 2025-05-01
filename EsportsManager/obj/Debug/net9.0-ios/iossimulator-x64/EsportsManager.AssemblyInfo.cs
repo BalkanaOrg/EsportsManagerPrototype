@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("EsportsManager")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0+dbc156a494375af81b720b8653a83df552d41ef3")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0+def6bce4f7d3d347e8df5837163ebf4699bdc876")]
 [assembly: System.Reflection.AssemblyProductAttribute("EsportsManager")]
 [assembly: System.Reflection.AssemblyTitleAttribute("EsportsManager")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

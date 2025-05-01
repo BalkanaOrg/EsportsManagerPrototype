@@ -22,6 +22,7 @@ namespace EsportsManager.Models
         public Color Color { get; set; } = new Color(255, 255, 255);
         public double TeamScore { get; set; } = 0;
         public string Region { get; set; }
+        public GroupStageResult GroupStageResults { get; set; }
 
         public double Momentum { get; set; } = 1.0;
         public Dictionary<string, double> MapWinRates { get; set; } = new();

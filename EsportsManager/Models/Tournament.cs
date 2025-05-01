@@ -37,8 +37,12 @@ namespace EsportsManager.Models
         public string CurrentStage { get; set; } = "1";
         public int TeamsPerGroup { get; set; }
         public int TeamsAdvancingPerGroup { get; set; }
-
+        public int GroupStageWeeks { get; set; }
+        public int PlayoffWeeks { get; set; }
         public bool HasGroupStage => GroupStages.Any();
+
+        public int? RelatedTournamentId { get; set; }
+        public Action? OnCompleted { get; set; }
 
         public List<Match> AllMatches
         {
