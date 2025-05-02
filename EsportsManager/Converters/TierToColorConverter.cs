@@ -19,6 +19,8 @@ namespace EsportsManager.Converters
                 {
                     TournamentTier.Online => Colors.LightBlue,
                     TournamentTier.Major => Colors.Gold,
+                    TournamentTier.RMR => Colors.Goldenrod,
+                    TournamentTier.S => Colors.Purple,
                     TournamentTier.A => Colors.DarkGreen,
                     TournamentTier.B => Colors.Blue,
                     _ => Colors.White

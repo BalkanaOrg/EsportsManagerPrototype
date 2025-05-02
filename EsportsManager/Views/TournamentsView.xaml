@@ -40,7 +40,7 @@
                             <Frame Padding="10"
                                    CornerRadius="10"
                                    BackgroundColor="{StaticResource CardBackground}"
-                                   BorderColor="{Binding TournamentTier, Converter={StaticResource TierToColorConverter}}"
+                                   BorderColor="{Binding Tier, Converter={StaticResource TierToColorConverter}}"
                                    HeightRequest="180"
                                    WidthRequest="180">
 

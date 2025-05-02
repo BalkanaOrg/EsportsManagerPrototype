@@ -30,12 +30,19 @@ public class CalendarViewModel : BaseViewModel
 
     public CalendarViewModel(GameService gameService) : base(gameService)
     {
-        var state = _gameService.GetGameState();
-        CurrentYear = state.CurrentYear;
-        CurrentWeek = state.CurrentWeek;
-        UpdateWeeklyEvents();
+        try
+        {
+            var state = _gameService.GetGameState();
+            CurrentYear = state.CurrentYear;
+            CurrentWeek = state.CurrentWeek;
+            UpdateWeeklyEvents();
 
-        NextWeekCommand = new Command(AdvanceWeek);
+            NextWeekCommand = new Command(AdvanceWeek);
+        }
+        catch
+        {
+
+        }
     }
 
     private void UpdateWeeklyEvents()
@@ -83,13 +90,13 @@ public class CalendarViewModel : BaseViewModel
             var state = _gameService.GetGameState();
             CurrentYear = state.CurrentYear;
             CurrentWeek = state.CurrentWeek;
-            UpdateWeeklyEvents();
+            //UpdateWeeklyEvents();
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Navigation failed: {ex.ToString()}");
             await Shell.Current.DisplayAlert("Error",
-                $"Couldn't open team: {ex.Message}",
+                $"Couldn't go to next week: {ex.Message}",
                 "OK");
         }
     }

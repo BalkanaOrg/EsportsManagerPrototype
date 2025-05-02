@@ -34,12 +34,19 @@ namespace EsportsManager.ViewModels
 
         public TeamViewModel(GameService gameService) : base(gameService)
         {
-            Team = _gameService.GetGameState().UserTeam;
+            try
+            {
+                Team = _gameService.GetGameState().UserTeam;
 
-            RefreshCommand = new Command(RefreshTeam);
-            BenchPlayerCommand = new Command<Player>(BenchPlayer);
-            ActivatePlayerCommand = new Command<Player>(ActivatePlayer);
-            ReleasePlayerCommand = new Command<Player>(ReleasePlayer);
+                RefreshCommand = new Command(RefreshTeam);
+                BenchPlayerCommand = new Command<Player>(BenchPlayer);
+                ActivatePlayerCommand = new Command<Player>(ActivatePlayer);
+                ReleasePlayerCommand = new Command<Player>(ReleasePlayer);
+            }
+            catch
+            {
+
+            }
         }
 
         public void RefreshTeam()

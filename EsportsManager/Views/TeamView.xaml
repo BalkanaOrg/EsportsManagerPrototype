@@ -43,7 +43,7 @@
                             <Button Grid.Column="4" Text="Release" 
                                     Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:TeamViewModel}}, Path=ReleasePlayerCommand}" 
                                     CommandParameter="{Binding .}" 
-                                    BackgroundColor="Red" TextColor="White"
+                                    BackgroundColor="DarkRed" TextColor="White"
                                     FontSize="12" Padding="6"/>
                         </Grid>
                     </DataTemplate>
@@ -83,7 +83,7 @@
                             <Button Grid.Column="4" Text="Release" 
                                 Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:TeamViewModel}}, Path=ReleasePlayerCommand}" 
                                 CommandParameter="{Binding .}" 
-                                BackgroundColor="Red" TextColor="White"
+                                BackgroundColor="DarkRed" TextColor="White"
                                 FontSize="12" Padding="6"/>
                         </Grid>
                     </DataTemplate>

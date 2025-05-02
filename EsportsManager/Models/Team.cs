@@ -23,6 +23,8 @@ namespace EsportsManager.Models
         public double TeamScore { get; set; } = 0;
         public string Region { get; set; }
         public GroupStageResult GroupStageResults { get; set; }
+        public int InitialSeed { get; set; }
+        public SwissRecord SwissRecord { get; set; } = new();
 
         public double Momentum { get; set; } = 1.0;
         public Dictionary<string, double> MapWinRates { get; set; } = new();

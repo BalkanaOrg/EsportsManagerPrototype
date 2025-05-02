@@ -2,67 +2,161 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:EsportsManager.ViewModels"
              xmlns:models="clr-namespace:EsportsManager.Models"
+             xmlns:converters="clr-namespace:EsportsManager.Converters"
              x:Class="EsportsManager.Views.TournamentDetailView"
              Title="{Binding Tournament.Name}"
              x:DataType="vm:TournamentDetailViewModel"
              x:Name="TournamentPage">
 
-    <ScrollView>
-        <StackLayout Padding="10" Spacing="10">
-            <!-- Tournament Header -->
-            <Frame>
-                <!-- Single container for both layouts -->
-                <Grid>
-                    <!-- "No data" message (shown when Tournament is null) -->
-                    <StackLayout IsVisible="{Binding Tournament, Converter={StaticResource NullToBoolConverter}}">
-                        <Label Text="No tournament data available"
-                   HorizontalOptions="Center"
-                   VerticalOptions="Center"
-                   FontAttributes="Italic"/>
-                    </StackLayout>
+    <RefreshView Command="{Binding LoadTournamentCommand}"
+                 IsRefreshing="{Binding IsBusy}">
+        <ScrollView>
+            <StackLayout Padding="10" Spacing="10">
+                <!-- Tournament Header -->
+                <Frame>
+                    <Grid>
+                        <!-- "No data" message -->
+                        <StackLayout IsVisible="{Binding Tournament, Converter={StaticResource NullToBoolConverter}}">
+                            <Label Text="No tournament data available"
+                                   HorizontalOptions="Center"
+                                   VerticalOptions="Center"
+                                   FontAttributes="Italic"/>
+                        </StackLayout>
 
-                    <!-- Tournament details (shown when Tournament exists) -->
-                    <StackLayout IsVisible="{Binding Tournament, Converter={StaticResource InverseNullToBoolConverter}}">
-                        <Label Text="{Binding Tournament.Name}" 
-                   FontSize="20" FontAttributes="Bold"/>
-                        <Label Text="{Binding Tournament.Tier, StringFormat='Tier: {0}'}"/>
-                        <Label Text="{Binding Tournament.PrizePool, StringFormat='Prize Pool: ${0:N0}'}"/>
-                        <Label Text="{Binding Tournament.Week, StringFormat='Starts Week: {0}'}"/>
-                    </StackLayout>
-                </Grid>
-            </Frame>
+                        <!-- Tournament details -->
+                        <StackLayout IsVisible="{Binding Tournament, Converter={StaticResource InverseNullToBoolConverter}}">
+                            <Label Text="{Binding Tournament.Name}" 
+                                   FontSize="20" FontAttributes="Bold"/>
+                            <Label Text="{Binding Tournament.Tier, StringFormat='Tier: {0}'}"/>
+                            <Label Text="{Binding Tournament.PrizePool, StringFormat='Prize Pool: ${0:N0}'}"/>
+                            <Label Text="{Binding Tournament.Week, StringFormat='Week: {0}'}"/>
+                            <Label Text="{Binding Tournament.CurrentStage}"
+                                   FontAttributes="Italic"/>
+                        </StackLayout>
+                    </Grid>
+                </Frame>
 
-            <!-- Participating Teams -->
-            <Label Text="Participating Teams:" 
-                   FontSize="16" FontAttributes="Bold"/>
-            <CollectionView ItemsSource="{Binding Tournament.ParticipatingTeams}">
-                <CollectionView.ItemTemplate>
-                    <DataTemplate x:DataType="models:Team">
-                        <Button Text="{Binding Name}"
-                    Command="{Binding Source={x:Reference TournamentPage}, Path=BindingContext.ViewTeamCommand}"
-                    CommandParameter="{Binding .}" />
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
-            <!-- Match Schedule -->
-            <Label Text="Match Schedule:" 
-                   FontSize="16" FontAttributes="Bold"/>
-            <CollectionView ItemsSource="{Binding Tournament.Matches}">
-                <CollectionView.ItemTemplate>
-                    <DataTemplate>
-                        <Frame Padding="10">
-                            <Grid ColumnDefinitions="*,Auto,*">
-                                <Label Text="{Binding Team1.Name}" 
-                                       HorizontalOptions="End"/>
-                                <Label Grid.Column="1" Text="vs" 
-                                       HorizontalOptions="Center"/>
-                                <Label Grid.Column="2" Text="{Binding Team2.Name}" 
-                                       HorizontalOptions="Start"/>
-                            </Grid>
-                        </Frame>
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
-        </StackLayout>
-    </ScrollView>
+                <!-- Participating Teams -->
+                <Label Text="Participating Teams:" 
+                       FontSize="16" FontAttributes="Bold"/>
+                <CollectionView ItemsSource="{Binding Tournament.ParticipatingTeams}"
+                                HeightRequest="200">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="models:Team">
+                            <Frame Padding="10" Margin="0,0,0,5">
+                                <Grid ColumnDefinitions="44,20,*,Auto" ColumnSpacing="10">
+                                    <Label Text="{Binding WorldRanking, StringFormat='#{0}'}" 
+                                           Grid.Column="0"
+                                           VerticalOptions="Center"
+                                           FontAttributes="Bold"
+                                           FontSize="14"
+                                           TextColor="DarkGray"/>
+                                    <BoxView Color="{Binding Color}" 
+                                           Grid.Column="1"
+                                           WidthRequest="20" HeightRequest="20" 
+                                           CornerRadius="10" VerticalOptions="Center"/>
+                                    <Label Text="{Binding Name}"
+                                           Grid.Column="2"
+                                           VerticalOptions="Center"/>
+                                    <Button Grid.Column="3" 
+                                            Text="View"
+                                            Command="{Binding Source={x:Reference TournamentPage}, 
+                                                    Path=BindingContext.ViewTeamCommand}"
+                                            CommandParameter="{Binding .}"
+                                            Padding="10,0"/>
+                                </Grid>
+                            </Frame>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+                <!-- Match Schedule -->
+                <Label Text="Match Schedule:" 
+                   FontSize="16" FontAttributes="Bold"
+                   IsVisible="{Binding IsTournamentCompleted, Converter={StaticResource InverseBoolConverter}}" />
+                    <CollectionView ItemsSource="{Binding Tournament.Matches}"
+                IsVisible="{Binding IsTournamentCompleted, Converter={StaticResource InverseBoolConverter}}"
+                SelectionMode="None">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="models:Match">
+                            <Frame Padding="10" Margin="0,0,0,5"
+                                   BackgroundColor="{Binding IsCompleted, 
+                                   Converter={StaticResource MatchStatusToColorConverter}}">
+                                <Grid ColumnDefinitions="*,Auto,*" RowDefinitions="Auto,Auto">
+                                    <!-- Team 1 -->
+                                    <Label Text="{Binding Team1.Name}" 
+                                           Grid.Column="0"
+                                           HorizontalOptions="End"
+                                           FontAttributes="Bold"/>
+
+                                    <!-- VS and Score -->
+                                    <StackLayout Grid.Column="1" HorizontalOptions="Center">
+                                        <Label Text="vs" 
+                                               HorizontalOptions="Center"/>
+                                        <Label Text="{Binding Team1Score, StringFormat='{0}'}"
+                                               HorizontalOptions="Center"
+                                               FontAttributes="Bold"/>
+                                        <Label Text="{Binding Team2Score, StringFormat='{0}'}"
+                                               HorizontalOptions="Center"
+                                               FontAttributes="Bold"/>
+                                    </StackLayout>
+
+                                    <!-- Team 2 -->
+                                    <Label Text="{Binding Team2.Name}" 
+                                           Grid.Column="2"
+                                           HorizontalOptions="Start"
+                                           FontAttributes="Bold"/>
+
+                                    <!-- Match details -->
+                                    <Label Text="{Binding Stage}"
+                                           Grid.Row="1" Grid.ColumnSpan="3"
+                                           HorizontalOptions="Center"
+                                           FontSize="12"/>
+                                </Grid>
+                            </Frame>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+                <!-- Match History -->
+                <Label Text="Match History:"
+                   FontSize="16" FontAttributes="Bold"
+                   IsVisible="{Binding IsTournamentCompleted}"/>
+                <CollectionView ItemsSource="{Binding Tournament.Matches}"
+                    IsVisible="{Binding IsTournamentCompleted}"
+                    SelectionMode="None">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="models:Match">
+                            <Frame Padding="10" Margin="0,0,0,5"
+                   BackgroundColor="{Binding IsCompleted, Converter={StaticResource MatchStatusToColorConverter}}">
+                                <Grid ColumnDefinitions="*,Auto,*" RowDefinitions="Auto,Auto">
+                                    <!-- Team 1 -->
+                                    <Label Text="{Binding Team1.Name}" 
+                           Grid.Column="0"
+                           HorizontalOptions="End"
+                           FontAttributes="Bold"/>
+                                    <!-- VS and Scores -->
+                                    <StackLayout Grid.Column="1" HorizontalOptions="Center">
+                                        <Label Text="vs" HorizontalOptions="Center"/>
+                                        <Label Text="{Binding Team1Score}" 
+                               HorizontalOptions="Center" FontAttributes="Bold"/>
+                                        <Label Text="{Binding Team2Score}" 
+                               HorizontalOptions="Center" FontAttributes="Bold"/>
+                                    </StackLayout>
+                                    <!-- Team 2 -->
+                                    <Label Text="{Binding Team2.Name}" 
+                           Grid.Column="2"
+                           HorizontalOptions="Start"
+                           FontAttributes="Bold"/>
+                                    <!-- Stage -->
+                                    <Label Text="{Binding Stage}" 
+                           Grid.Row="1" Grid.ColumnSpan="3"
+                           HorizontalOptions="Center" FontSize="12"/>
+                                </Grid>
+                            </Frame>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </StackLayout>
+        </ScrollView>
+    </RefreshView>
 </ContentPage>

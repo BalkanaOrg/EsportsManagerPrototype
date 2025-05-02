@@ -28,7 +28,14 @@ namespace EsportsManager.ViewModels
 
         public TeamProfileViewModel(GameService gameService) : base(gameService)
         {
-            _gameService = gameService;
+            try
+            {
+                _gameService = gameService;
+            }
+            catch
+            {
+
+            }
         }
 
         public async Task LoadTeam(int teamId)

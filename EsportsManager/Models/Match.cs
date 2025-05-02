@@ -15,6 +15,7 @@ namespace EsportsManager.Models
         public int Team2Score { get; set; }
         public DateTime MatchDate { get; set; }
         public Tournament Tournament { get; set; }
+        public string Score => $"{Team1Score} - {Team2Score}";
         public bool IsCompleted { get; set; }
         public int Year { get; set; }
         public int Week { get; set; }

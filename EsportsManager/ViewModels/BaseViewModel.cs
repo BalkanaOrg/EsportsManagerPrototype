@@ -9,7 +9,14 @@ public partial class BaseViewModel : INotifyPropertyChanged
 
     public BaseViewModel(GameService gameService)
     {
-        _gameService = gameService;
+        try
+        {
+            _gameService = gameService;
+        }
+        catch
+        {
+
+        }
     }
 
     public event PropertyChangedEventHandler PropertyChanged;

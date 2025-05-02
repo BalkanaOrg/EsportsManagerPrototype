@@ -57,14 +57,22 @@ namespace EsportsManager.ViewModels
 
         public WorldRankingsViewModel(GameService gameService)
         {
-            _gameService = gameService;
-            ViewTeamCommand = new Command<Team>(ViewTeam);
-            LoadRankings();
+            try
+            {
+                _gameService = gameService;
+                ViewTeamCommand = new Command<Team>(ViewTeam);
+                LoadRankings();
+            }
+            catch
+            {
+
+            }
         }
 
         public void LoadRankings()
         {
             var gameState = _gameService.GetGameState();
+            _gameService.UpdateTeamRankings();
 
             // Get teams ordered by their world ranking
             var rankedTeams = gameState.AllTeams
