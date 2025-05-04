@@ -10,6 +10,8 @@ namespace EsportsManager.ViewModels
     {
         public ObservableCollection<Player> ActivePlayers { get; set; }
         public ObservableCollection<Player> BenchPlayers { get; set; }
+        public ObservableCollection<Match> MatchHistory { get; set; } = new();
+
         public decimal WeeklyExpense { get; set; }
 
         private Team _team;
@@ -47,6 +49,33 @@ namespace EsportsManager.ViewModels
             {
 
             }
+        }
+
+        private void LoadMatchHistory()
+        {
+            try
+            {
+                var allMatches = _gameService.GetAllCompletedMatches(); // however you collect all matches
+                var myTeam = Team; // your current team
+
+                var relevantMatches = allMatches
+                    .Where(m => m.IsCompleted && (m.Team1 == myTeam || m.Team2 == myTeam))
+                    .OrderByDescending(m => m.Year * 100 + m.Week) // latest first
+                    .ToList();
+
+                MatchHistory.Clear();
+                foreach (var match in relevantMatches)
+                    MatchHistory.Add(match);
+            }
+            catch
+            {
+
+            }
+        }
+
+        public Color GetResultColor(Match match)
+        {
+            return match.Winner == Team ? Colors.Green : Colors.Red;
         }
 
         public void RefreshTeam()
@@ -118,6 +147,7 @@ namespace EsportsManager.ViewModels
         {
             RefreshTeam();
             OnPropertyChanged(nameof(Team));
+            LoadMatchHistory();
             // Or reload whatever data you're binding to
         }
     }

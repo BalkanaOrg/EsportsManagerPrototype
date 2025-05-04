@@ -78,7 +78,48 @@
                    FontSize="18" 
                    FontAttributes="Bold"/>
             <CollectionView ItemsSource="{Binding Team.Bench}">
-                <!-- Same template as active players -->
+                <CollectionView.ItemsLayout>
+                    <LinearItemsLayout Orientation="Vertical" ItemSpacing="5"/>
+                </CollectionView.ItemsLayout>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Frame Padding="10">
+                            <Grid ColumnDefinitions="Auto,*,Auto">
+                                <!-- Solution 1: ImageButton -->
+                                <ImageButton Grid.Column="0"
+                             Source="{Binding Nationality, Converter={StaticResource NationalityToFlagConverter}}"
+                             WidthRequest="30"
+                             HeightRequest="20"
+                             Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:TeamProfileViewModel}}, 
+                                              Path=ViewPlayerCommand}"
+                             CommandParameter="{Binding .}"
+                             BackgroundColor="Transparent"
+                             Padding="0">
+                                    <ImageButton.GestureRecognizers>
+                                        <TapGestureRecognizer 
+                            Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:TeamProfileViewModel}}, 
+                                             Path=ViewPlayerCommand}"
+                            CommandParameter="{Binding .}"/>
+                                    </ImageButton.GestureRecognizers>
+                                </ImageButton>
+
+                                <StackLayout Grid.Column="1">
+                                    <Label Text="{Binding FullName}" 
+                           FontAttributes="Bold"/>
+                                    <Label Text="{Binding Role}" 
+                           FontSize="14"/>
+                                    <Label Text="{Binding Stats.Rating, StringFormat='Rating: {0:F2}'}"/>
+                                </StackLayout>
+
+                                <Button Grid.Column="2" 
+                        Text="View"
+                        Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:TeamProfileViewModel}}, 
+                                         Path=ViewPlayerCommand}"
+                        CommandParameter="{Binding .}"/>
+                            </Grid>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
             </CollectionView>
         </StackLayout>
     </ScrollView>

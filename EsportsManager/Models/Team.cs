@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -7,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace EsportsManager.Models
 {
-    public class Team
+    public class Team : ObservableObject
     {
         public int Id { get; set; }
         public string Name { get; set; }
@@ -51,6 +52,19 @@ namespace EsportsManager.Models
                 MapWinRates[map] = 0.5; // Default 50% win rate
 
             MapWinRates[map] = (MapWinRates[map] * 0.9) + (won ? 0.1 : 0);
+        }
+
+        private int _totalPlayerCount;
+        public int TotalPlayerCount
+        {
+            get => _totalPlayerCount;
+            set => SetProperty(ref _totalPlayerCount, value);
+        }
+
+        // Call this whenever Players or Bench collections change
+        public void UpdatePlayerCount()
+        {
+            TotalPlayerCount = Players.Count + Bench.Count;
         }
     }
 }

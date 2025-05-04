@@ -81,7 +81,7 @@ public class GameService
             {
                 Id = _gameState.AllTeams.Count + 1,
                 Name = GenerateTeamName(),
-                Budget = 300000 + random.Next(0, 400000),
+                Budget = 300000 + random.Next(100000, 700000),
                 Players = new ObservableCollection<Player>(),
                 Bench = new ObservableCollection<Player>(),
                 MatchHistory = new List<MatchHistory>(),
@@ -90,11 +90,22 @@ public class GameService
 
             for (int j = 0; j < 7; j++)
             {
-                var player = GeneratePlayerForTeam(aiTeam.Id, j < 3);
-                if (j < 5)
+                if(j < 5)
+                {
+                    var player = GeneratePlayerForTeam(aiTeam.Id, j < 3);
                     aiTeam.Players.Add(player);
+                    aiTeam.WeeklyExpense += player.Salary;
+                }
                 else
-                    aiTeam.Bench.Add(player);
+                {
+                    //Ability for a 6 or 7 man roster
+                    if(random.Next(10) == 1)
+                    {
+                        var player = GeneratePlayerForTeam(aiTeam.Id, j < 3);
+                        aiTeam.Bench.Add(player);
+                        aiTeam.WeeklyExpense += player.Salary;
+                    }
+                }
             }
 
             _gameState.AllTeams.Add(aiTeam);
@@ -172,44 +183,15 @@ public class GameService
         //Major
         _gameState.ActiveTournaments = new List<Tournament>();
         int currentYear = _gameState.CurrentYear;
-
-        //var major = CreateTournament(
-        //    name: $"{GetCityName()} - {currentYear} Major",
-        //    tier: TournamentTier.Major,
-        //    prizePool: 3000000,
-        //    year: currentYear,
-        //    startWeek: 15,
-        //    durationWeeks: 3,
-        //    teamCount: 32,
-        //    format: TournamentFormat.SingleElimination
-        //);
-        //major.CurrentStage = "Round of 32";
-        //_gameState.UpcomingTournaments.Add(major);
-
-
-        ////Major RMR
-        //var rmr = CreateTournament(
-        //    name: $"{major.Name} - {currentYear} RMR",
-        //    tier: TournamentTier.RMR,
-        //    prizePool: 1000000,
-        //    year: currentYear,
-        //    startWeek: major.Week-5,
-        //    durationWeeks: 2,
-        //    teamCount: 32,
-        //    format: TournamentFormat.SingleElimination
-        //);
-        //rmr.CurrentStage = "Round of 32";
-        //_gameState.UpcomingTournaments.Add(rmr);
-
         MajorCreator();
 
         //Random S-tier tournaments
-        for (int i = 1; i <= 8; i++)
+        for (int i = 1; i <= 6; i++)
         {
             var tournament = CreateTournament(
-                name: $"{GetTournamentName()} {currentYear} {i}",
+                name: $"{GetTournamentName("S")} {currentYear} {i}",
                 tier: TournamentTier.S,
-                prizePool: 250000,
+                prizePool: 1000000,
                 year: currentYear,
                 startWeek: 2 + (i * 3),
                 durationWeeks: 5,
@@ -219,14 +201,10 @@ public class GameService
                 format: TournamentFormat.SingleElimination
             );
             tournament.CurrentStage = "Round of 32";
-            var participants = _gameState.AllTeams
-                    .OrderByDescending(t => CalculateTeamStrength(t))
-                    .Take(16)
-                    .ToList();
-            tournament.ParticipatingTeams = participants;
             _gameState.ActiveTournaments.Add(tournament);
         }
 
+        //ESL Pro League
         for(int i = 1; i<=2; i++)
         {
             string a;
@@ -245,11 +223,82 @@ public class GameService
                     format: TournamentFormat.SingleElimination
                     );
             tournament.CurrentStage = "Round of 32";
-            var participants = _gameState.AllTeams
-                    .OrderByDescending(t => CalculateTeamStrength(t))
-                    .Take(32)
-                    .ToList();
-            tournament.ParticipatingTeams = participants;
+            _gameState.ActiveTournaments.Add(tournament);
+        }
+
+        //Random A-tier tournaments
+        for (int i = 1; i <= 8; i++)
+        {
+            var tournament = CreateTournament(
+                name: $"{GetTournamentName("A")} {currentYear} {i}",
+                tier: TournamentTier.A,
+                prizePool: 250000,
+                year: currentYear,
+                startWeek: 3 + (i * 2),
+                durationWeeks: 5,
+                groupstageWeeks: 0,
+                playoffWeeks: 0,
+                teamCount: 32,
+                format: TournamentFormat.SingleElimination
+            );
+            tournament.CurrentStage = "Round of 32";
+            _gameState.ActiveTournaments.Add(tournament);
+        }
+
+        //Random B-tier tournaments
+        for (int i = 1; i <= 7; i++)
+        {
+            var tournament = CreateTournament(
+                name: $"{GetTournamentName("B")} {currentYear} {i}",
+                tier: TournamentTier.B,
+                prizePool: 250000,
+                year: currentYear,
+                startWeek: 5 + (i * 3),
+                durationWeeks: 5,
+                groupstageWeeks: 0,
+                playoffWeeks: 0,
+                teamCount: 32,
+                format: TournamentFormat.SingleElimination
+            );
+            tournament.CurrentStage = "Round of 32";
+            _gameState.ActiveTournaments.Add(tournament);
+        }
+
+        //Random C-tier tournaments
+        for (int i = 1; i <= 7; i++)
+        {
+            var tournament = CreateTournament(
+                name: $"{GetTournamentName("C")} {currentYear} {i}",
+                tier: TournamentTier.C,
+                prizePool: 100000,
+                year: currentYear,
+                startWeek: 5 + (i * 3),
+                durationWeeks: 5,
+                groupstageWeeks: 0,
+                playoffWeeks: 0,
+                teamCount: 32,
+                format: TournamentFormat.SingleElimination
+            );
+            tournament.CurrentStage = "Round of 32";
+            _gameState.ActiveTournaments.Add(tournament);
+        }
+
+        //Random Online tournaments
+        for (int i = 1; i <= 20; i++)
+        {
+            var tournament = CreateTournament(
+                name: $"{GetTournamentName("Online")} {currentYear} {i}",
+                tier: TournamentTier.Online,
+                prizePool: 30000,
+                year: currentYear,
+                startWeek: 4 + (i * 2),
+                durationWeeks: 5,
+                groupstageWeeks: 0,
+                playoffWeeks: 0,
+                teamCount: 32,
+                format: TournamentFormat.SingleElimination
+            );
+            tournament.CurrentStage = "Round of 32";
             _gameState.ActiveTournaments.Add(tournament);
         }
     }
@@ -281,21 +330,9 @@ public class GameService
             Matches = new List<Match>(),
             GroupStages = new List<GroupStage>(),
             Format = format,
-            IsCompleted = false
+            IsCompleted = false,
+            TeamCount = teamCount
         };
-
-        var participants = _gameState.AllTeams
-            .OrderByDescending(t => CalculateTeamStrength(t))
-            .Take(teamCount)
-            .ToList();
-
-        if (!participants.Contains(_gameState.UserTeam))
-        {
-            participants.RemoveAt(participants.Count - 1);
-            participants.Add(_gameState.UserTeam);
-        }
-
-        tournament.ParticipatingTeams = participants;
 
         switch (format)
         {
@@ -350,38 +387,38 @@ public class GameService
         };
     }
 
-    private void GenerateTournamentsForYear(int year)
-    {
-        // Majors (2 per year)
-        for (int i = 0; i < 2; i++)
-        {
-            _gameState.ActiveTournaments.Add(new Tournament
-            {
-                Id = GetNextTournamentId(),
-                Name = $"{GetCityName()} - {year} Major",
-                Tier = TournamentTier.Major,
-                PrizePool = 1000000,
-                Year = year,
-                Week = random.Next(10, 40),
-                DurationWeeks = 2
-            });
-        }
+    //private void GenerateTournamentsForYear(int year)
+    //{
+    //    // Majors (2 per year)
+    //    for (int i = 0; i < 2; i++)
+    //    {
+    //        _gameState.ActiveTournaments.Add(new Tournament
+    //        {
+    //            Id = GetNextTournamentId(),
+    //            Name = $"{GetCityName()} - {year} Major",
+    //            Tier = TournamentTier.Major,
+    //            PrizePool = 1000000,
+    //            Year = year,
+    //            Week = random.Next(10, 40),
+    //            DurationWeeks = 2
+    //        });
+    //    }
 
-        // Tier A tournaments (6 per year)
-        for (int i = 0; i < 6; i++)
-        {
-            _gameState.ActiveTournaments.Add(new Tournament
-            {
-                Id = GetNextTournamentId(),
-                Name = $"{GetTournamentName()} {year}",
-                Tier = TournamentTier.S,
-                PrizePool = 250000,
-                Year = year,
-                Week = random.Next(5, 45),
-                DurationWeeks = 1
-            });
-        }
-    }
+    //    // Tier A tournaments (6 per year)
+    //    for (int i = 0; i < 6; i++)
+    //    {
+    //        _gameState.ActiveTournaments.Add(new Tournament
+    //        {
+    //            Id = GetNextTournamentId(),
+    //            Name = $"{GetTournamentName("A")} {year}",
+    //            Tier = TournamentTier.S,
+    //            PrizePool = 250000,
+    //            Year = year,
+    //            Week = random.Next(5, 45),
+    //            DurationWeeks = 1
+    //        });
+    //    }
+    //}
 
     private string GetCityName()
     {
@@ -389,9 +426,29 @@ public class GameService
         return cities[random.Next(cities.Length)];
     }
 
-    private string GetTournamentName()
+    private string GetTournamentName(string tier)
     {
-        string[] names = { "HackedDreams", "Electronic League", "IEMbg", "BOOM", "EPIC", "Esports World Cup", "Academy", "FACEUP", "StarLadder", "PGL", "Balkana" };
+        string[] names;
+
+        switch (tier)
+        {
+            case "S":
+                names = new[] { "IEM", "Blast Premiere", "PGL", "DreamHack Masters", "ESL One", "StarLadder", "E-League" };
+                break;
+            case "A":
+                names = new[] { "ESL Challenger", "DreamHack Open", "Blast Premier Showdown", "IEM Road to Rio", "YaLLa Compass" };
+                break;
+            case "B":
+                names = new[] { "King of Kings", "BetBoom", "Elisa Championship", "IEM Road to Rio", "CCT" };
+                break;
+            case "Online":
+                names = new[] { "Balkana Invitational", "Balkana FACEOFF", "NoNamers", "RoadToGlory", "Efbet", "BetBoom Online", "Onliners", "CheatersUnited", "TipSports", "Odyssey Cup", "Online Cup" };
+                break;
+            default:
+                names = new[] { "NoName" }; // Ensure 'names' is always initialized
+                break;
+        }
+
         return names[random.Next(names.Length)];
     }
 
@@ -497,7 +554,7 @@ public class GameService
             _gameState.CurrentWeek = 1;
             _gameState.CurrentYear++;
 
-            GenerateTournamentsForYear(_gameState.CurrentYear);
+            GenerateInitialTournaments();
         }
 
         // RMR logic
@@ -530,8 +587,9 @@ public class GameService
                 .FirstOrDefault(t => t.RelatedTournamentId == major2.Id);
             ConcludeRMR(rmr);
         }
-
+        _gameState.Budget = _gameState.UserTeam.Budget;
         _gameState.Budget -= _gameState.WeeklyExpense;
+        PopulateNextTournament();
         UpdateTeamRankings();
     }
 
@@ -817,35 +875,6 @@ public class GameService
             //    break;
         }
     }
-    private void GenerateNextRoundMatches(Tournament tournament)
-    {
-        var winners = tournament.Matches
-            .Where(m => m.IsCompleted)
-            .Select(m => m.Winner)
-            .Distinct()
-            .OrderBy(t => Guid.NewGuid())
-            .ToList();
-
-        tournament.Matches.Clear();
-
-        for (int i = 0; i < winners.Count; i += 2)
-        {
-            if (i + 1 < winners.Count)
-            {
-                tournament.Matches.Add(new Match
-                {
-                    Team1 = winners[i],
-                    Team2 = winners[i + 1],
-                    Tournament = tournament,
-                    MatchDate = new DateTime(_gameState.CurrentYear, 1, 1).AddDays((_gameState.CurrentWeek - 1) * 7)
-                });
-            }
-            else
-            {
-                winners[i].Budget += tournament.PrizePool * 0.1m;
-            }
-        }
-    }
 
     private void PlayMatch(Match match)
     {
@@ -867,11 +896,19 @@ public class GameService
         int team1Rounds = 0;
         int team2Rounds = 0;
 
-        while (team1Rounds < 13 && team2Rounds < 13)
+        while (true)
         {
             double chance = random.NextDouble() * totalStrength;
             if (chance < team1Strength) team1Rounds++;
             else team2Rounds++;
+            if (team1Rounds == 13 && team2Rounds <= 11)
+                break;
+            if (team2Rounds == 13 && team1Rounds <= 11)
+                break;
+
+            // Trigger overtime if 12–12
+            if (team1Rounds == 12 && team2Rounds == 12)
+                break;
         }
 
         // If both reached 12 before one got to 13, trigger OT
@@ -888,6 +925,7 @@ public class GameService
                 ot1 = 0;
                 ot2 = 0;
 
+                // Simulate 6 overtime rounds
                 for (int i = 0; i < 6; i++)
                 {
                     double chance = random.NextDouble() * totalStrength;
@@ -895,18 +933,24 @@ public class GameService
                     else ot2++;
                 }
 
-                if (Math.Abs(ot1 - ot2) >= 2 && (ot1 >= 4 || ot2 >= 4))
+                // If a team wins more than 3 rounds in OT, that team wins
+                if (ot1 > 3 || ot2 > 3)
                 {
                     hasWinner = true;
                 }
+                team1Rounds += ot1;
+                team2Rounds += ot2;
             }
 
-            team1Rounds += ot1;
-            team2Rounds += ot2;
+            match.Team1Score = team1Rounds;
+            match.Team2Score = team2Rounds;
+        }
+        else
+        {
+            match.Team1Score = team1Rounds;
+            match.Team2Score = team2Rounds;
         }
 
-        match.Team1Score = team1Rounds;
-        match.Team2Score = team2Rounds;
         match.IsCompleted = true;
         match.Winner = team1Rounds > team2Rounds ? match.Team1 : match.Team2;
 
@@ -950,25 +994,6 @@ public class GameService
         }
     }
 
-    private void GeneratePlayerMatchHistories(Match match)
-    {
-        foreach (var player in match.Team1.Players.Concat(match.Team2.Players))
-        {
-            player.MatchHistory.Add(new MatchHistory
-            {
-                PlayerId = player.Id,
-                MatchId = match.Id,
-                Kills = random.Next(5, 30),
-                Deaths = random.Next(5, 30),
-                Assists = random.Next(0, 15),
-                Rating = random.NextDouble() * 2.0,
-                ADR = random.Next(50, 120),
-                FlashAssists = random.Next(0, 5),
-                EntryKills = random.Next(0, 5)
-            });
-        }
-    }
-
     private Team DetermineTournamentWinner(Tournament tournament)
     {
         // Simple implementation - team with most match wins
@@ -983,13 +1008,16 @@ public class GameService
         // Simple prize distribution
         if (tournament.Winner != null)
         {
-            tournament.Winner.Budget += tournament.PrizePool * 0.5m;
+            var winner = _gameState.AllTeams.FirstOrDefault(c => c.Id == tournament.Winner.Id);
+            winner.Budget += tournament.PrizePool / 2;
 
             // Distribute remaining to other teams
-            decimal remaining = tournament.PrizePool * 0.5m;
+            decimal remaining = tournament.PrizePool / 2;
             decimal perTeam = remaining / (tournament.ParticipatingTeams.Count - 1);
-
-            foreach (var team in tournament.ParticipatingTeams.Where(t => t != tournament.Winner))
+            var participants = _gameState.AllTeams
+                .Where(t => tournament.ParticipatingTeams
+                .Any(pt => pt.Id == t.Id && pt.Id != tournament.Winner.Id));
+            foreach (var team in participants)
             {
                 team.Budget += perTeam;
             }
@@ -1089,9 +1117,10 @@ public class GameService
         }
     }
 
-    private List<Match> GetAllCompletedMatches()
+    public List<Match> GetAllCompletedMatches()
     {
         return _gameState.CompletedTournaments
+            .Concat(_gameState.ActiveTournaments)
             .SelectMany(t => t.Matches)
             .Where(m => m.IsCompleted)
             .ToList();
@@ -1581,19 +1610,51 @@ public class GameService
             ParticipatingTeams = new List<Team>(),
             Matches = new List<Match>(),
             Format = TournamentFormat.SingleElimination,
-            CurrentStage = "Round of 32"
+            CurrentStage = "Round of 32",
+            TeamCount = 32,
         };
+
+        return major;
+    }
+
+    private Tournament CreateMajorRMR(Tournament major)
+    {
+        var rmr = new Tournament
+        {
+            Id = GetNextTournamentId(),
+            Name = $"{major.Name} RMR Qualifier",
+            Tier = TournamentTier.RMR,
+            PrizePool = 250000,
+            Year = major.Year,
+            Week = major.Week - 5,
+            DurationWeeks = 1,
+            GroupStageWeeks = 1,
+            ParticipatingTeams = new List<Team>(),
+            Matches = new List<Match>(),
+            Format = TournamentFormat.SingleElimination,
+            CurrentStage = "Round of 32",
+            RelatedTournamentId = major.Id,
+            TeamCount = 32,
+        };
+        _gameState.ActiveTournaments.Add(rmr);
+        return rmr;
+    }
+
+    private void PopulateRMR(Tournament rmr)
+    {
+        var major = _gameState.ActiveTournaments
+        .FirstOrDefault(t => t.Id == rmr.RelatedTournamentId);
 
 
         var allTeams = _gameState.AllTeams
             .OrderByDescending(t => CalculateTeamStrength(t))
             .ToList();
-
+        //Populate Major
         // Directly invite top 16 teams (7 EU, 6 AM, 3 AS)
         var directInvites = new List<Team>();
         int euCount = 0, amCount = 0, asCount = 0;
-
-        foreach (var team in allTeams)
+        var topTeams = allTeams.OrderBy(c => c.WorldRanking).ToList();
+        foreach (var team in topTeams)
         {
             if (directInvites.Count >= 16) break;
 
@@ -1620,82 +1681,6 @@ public class GameService
         major.ParticipatingTeams.AddRange(directInvites);
         major.ParticipatingTeams.AddRange(new Team[32 - directInvites.Count]); // Placeholders
 
-        return major;
-    }
-
-    private Tournament CreateMajorRMR(Tournament major)
-    {
-        var rmr = new Tournament
-        {
-            Id = GetNextTournamentId(),
-            Name = $"{major.Name} RMR Qualifier",
-            Tier = TournamentTier.RMR,
-            PrizePool = 250000,
-            Year = major.Year,
-            Week = major.Week - 5,
-            DurationWeeks = 1,
-            GroupStageWeeks = 1,
-            ParticipatingTeams = new List<Team>(),
-            Matches = new List<Match>(),
-            Format = TournamentFormat.SingleElimination,
-            CurrentStage = "Round of 32",
-            RelatedTournamentId = major.Id
-        };
-
-        // Take top 32 teams not already qualified
-        //var rmrTeams = eligibleTeams
-        //    .OrderByDescending(t => CalculateTeamStrength(t))
-        //    .Take(32)
-        //    .ToList();
-
-        //rmr.ParticipatingTeams = rmrTeams;
-
-        //// Generate matches
-        //GenerateSingleEliminationMatches(rmr);
-
-        //// Set completion handler to update major participants
-        //rmr.OnCompleted = () =>
-        //{
-        //    var qualifiers = rmr.Matches
-        //        .Where(m => m.Stage == "Grand Final")
-        //        .Select(m => m.Winner)
-        //        .Take(16) // Top 16 qualify
-        //        .ToList();
-
-        //    // Replace placeholder slots in major with qualifiers
-        //    for (int i = 0; i < qualifiers.Count; i++)
-        //    {
-        //        int slotIndex = major.ParticipatingTeams.FindIndex(t => t == null);
-        //        if (slotIndex >= 0)
-        //        {
-        //            major.ParticipatingTeams[slotIndex] = qualifiers[i];
-        //        }
-        //    }
-
-        //    // Fill any remaining slots with highest ranked non-qualified teams
-        //    var backupTeams = eligibleTeams.Except(qualifiers)
-        //        .OrderByDescending(t => CalculateTeamStrength(t))
-        //        .Take(16 - qualifiers.Count)
-        //        .ToList();
-
-        //    for (int i = 0; i < backupTeams.Count; i++)
-        //    {
-        //        int slotIndex = major.ParticipatingTeams.FindIndex(t => t == null);
-        //        if (slotIndex >= 0)
-        //        {
-        //            major.ParticipatingTeams[slotIndex] = backupTeams[i];
-        //        }
-        //    }
-        //};
-        _gameState.ActiveTournaments.Add(rmr);
-        return rmr;
-    }
-
-    private void PopulateRMR(Tournament rmr)
-    {
-        var major = _gameState.ActiveTournaments
-        .FirstOrDefault(t => t.Id == rmr.RelatedTournamentId);
-
         var alreadyQualified = new HashSet<Team>(major.ParticipatingTeams.Where(t => t != null));
 
         var eligibleTeams = _gameState.AllTeams
@@ -1718,7 +1703,7 @@ public class GameService
         if (major == null) return;
 
         var qualifiers = rmr.Matches
-            .Where(m => m.Stage == "Round of 32") // Adjust if you use different stage labels
+            .Where(m => m.Stage == "Round of 32")
             .Select(m => m.Winner)
             .Where(w => w != null)
             .Distinct()
@@ -1734,9 +1719,59 @@ public class GameService
                 major.ParticipatingTeams[slotIndex] = team;
             }
         }
-
+        DistributePrizeMoney(rmr);
         GenerateSingleEliminationMatches(major);
     }
+    private void PopulateNextTournament()
+    {
+        var topTeams = _gameState.AllTeams.OrderBy(c => c.WorldRanking).ToList();
+        var nextTournaments = _gameState.ActiveTournaments
+            .Where(t => t.Year == _gameState.CurrentYear &&
+                                 t.Week == _gameState.CurrentWeek + 2)
+            .ToList();
+        if (nextTournaments != null)
+        {
+            foreach(var tournament in nextTournaments)
+            {
+                if (tournament.Tier == TournamentTier.S || tournament.Tier == TournamentTier.A)
+                {
+                    var teams = topTeams
+                        .Take(tournament.TeamCount).ToList();
+                    tournament.ParticipatingTeams
+                        .AddRange(teams);
+                    GenerateSingleEliminationMatches(tournament);
+                }
+                else if(tournament.Tier == TournamentTier.B)
+                {
+                    var teams = _gameState.AllTeams
+                        .Where(c => c.WorldRanking >= 32)
+                        .Take(tournament.TeamCount).ToList();
+                    tournament.ParticipatingTeams
+                        .AddRange(teams);
+                    GenerateSingleEliminationMatches(tournament);
+                }
+                else if (tournament.Tier == TournamentTier.C)
+                {
+                    var teams = _gameState.AllTeams
+                        .Where(c => c.WorldRanking >= 50)
+                        .Take(tournament.TeamCount).ToList();
+                    tournament.ParticipatingTeams
+                        .AddRange(teams);
+                    GenerateSingleEliminationMatches(tournament);
+                }
+                else if (tournament.Tier == TournamentTier.Online)
+                {
+                    var teams = _gameState.AllTeams
+                        .Where(c => c.WorldRanking >= 100)
+                        .Take(tournament.TeamCount).ToList();
+                    tournament.ParticipatingTeams
+                        .AddRange(teams);
+                    GenerateSingleEliminationMatches(tournament);
+                }
+            }
+        }
+    }
+
 
     public decimal ReturnBudget() => _gameState.Budget;
 

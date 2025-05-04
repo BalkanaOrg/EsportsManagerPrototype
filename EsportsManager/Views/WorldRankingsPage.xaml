@@ -68,7 +68,7 @@
 
                             <!-- Player Count -->
                             <Label Grid.Column="4" 
-                                   Text="{Binding Players.Count, StringFormat='{0} players'}"
+                                   Text="{Binding TotalPlayerCount, StringFormat='{0} players'}"
                                    HorizontalOptions="End" VerticalOptions="Center"/>
                         </Grid>
                     </Frame>

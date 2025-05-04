@@ -18,6 +18,7 @@ namespace EsportsManager.ViewModels
         private ObservableCollection<Team> _rankedTeams;
         private Team _selectedTeam;
         private string _searchText;
+        public int PlayersInTeam;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -78,6 +79,11 @@ namespace EsportsManager.ViewModels
             var rankedTeams = gameState.AllTeams
                 .OrderBy(t => t.WorldRanking)
                 .ToList();
+
+            foreach (var team in rankedTeams)
+            {
+                team.TotalPlayerCount = team.Players.Count + team.Bench.Count;
+            }
 
             RankedTeams = new ObservableCollection<Team>(rankedTeams);
         }

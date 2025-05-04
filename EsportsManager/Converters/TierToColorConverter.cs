@@ -17,12 +17,13 @@ namespace EsportsManager.Converters
             {
                 return color switch
                 {
-                    TournamentTier.Online => Colors.LightBlue,
+                    TournamentTier.Online => Colors.LightGrey,
                     TournamentTier.Major => Colors.Gold,
                     TournamentTier.RMR => Colors.Goldenrod,
                     TournamentTier.S => Colors.Purple,
                     TournamentTier.A => Colors.DarkGreen,
                     TournamentTier.B => Colors.Blue,
+                    TournamentTier.C => Colors.LightBlue,
                     _ => Colors.White
 
                 };

@@ -1,12 +1,11 @@
-<!-- TeamView.xaml -->
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:viewmodels="clr-namespace:EsportsManager.ViewModels"
              x:Class="EsportsManager.Views.TeamView"
              Title="My Team">
 
-    <Grid RowDefinitions="Auto,*,Auto" ColumnDefinitions="*">
-        <!-- Team Info -->
+    <Grid RowDefinitions="Auto,*">
+        <!-- Team Info (spans both columns) -->
         <VerticalStackLayout Grid.Row="0" Padding="10" Spacing="5">
             <Label Text="{Binding Team.Name}" FontSize="24" FontAttributes="Bold" />
             <Label Text="{Binding Team.WorldRanking, StringFormat='World Ranking: #{0}'}" />
@@ -14,81 +13,116 @@
             <Label Text="{Binding Team.WeeklyExpense, StringFormat='Expense: ${0:N0}'}" />
         </VerticalStackLayout>
 
-        <!-- Players -->
-        <RefreshView Grid.Row="1" Command="{Binding RefreshCommand}">
-            <CollectionView ItemsSource="{Binding ActivePlayers}" SelectionMode="Single" SelectedItem="{Binding SelectedPlayer}">
-                <CollectionView.ItemTemplate>
-                    <DataTemplate>
-                        <Grid Padding="10">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="70"/>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="90"/>
-                                <ColumnDefinition Width="90"/>
-                            </Grid.ColumnDefinitions>
+        <!-- Players and Match History -->
+        <Grid Grid.Row="1" ColumnDefinitions="2*,3*">
+            <!-- Left: Players -->
+            <ScrollView Grid.Column="0">
+                <VerticalStackLayout Padding="10" Spacing="10">
+                    <Label Text="Active Players" FontSize="18" FontAttributes="Bold"/>
+                    <CollectionView ItemsSource="{Binding ActivePlayers}" SelectionMode="None">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Padding="10">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="70"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="90"/>
+                                        <ColumnDefinition Width="90"/>
+                                    </Grid.ColumnDefinitions>
 
-                            <Image Grid.Column="0" Source="{Binding Nationality, Converter={StaticResource NationalityToFlagConverter}}" 
+                                    <Image Grid.Column="0" Source="{Binding Nationality, Converter={StaticResource NationalityToFlagConverter}}" 
                                    WidthRequest="40" HeightRequest="30" Aspect="AspectFill" />
-                            <VerticalStackLayout Grid.Column="2" Spacing="2">
-                                <Label Text="{Binding FullName}" FontAttributes="Bold" />
-                                <Label Text="{Binding Role}" FontSize="14" />
-                                <Label Text="{Binding Stats.Rating, StringFormat='Rating: {0:F2}'}" FontSize="12" />
-                            </VerticalStackLayout>
+                                    <VerticalStackLayout Grid.Column="2" Spacing="2">
+                                        <Label Text="{Binding FullName}" FontAttributes="Bold" />
+                                        <Label Text="{Binding Role}" FontSize="14" />
+                                        <Label Text="{Binding Stats.Rating, StringFormat='Rating: {0:F2}'}" FontSize="12" />
+                                    </VerticalStackLayout>
 
-                            <Button Grid.Column="3" Text="Bench" 
+                                    <Button Grid.Column="3" Text="Bench" 
                                     Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:TeamViewModel}}, Path=BenchPlayerCommand}" 
                                     CommandParameter="{Binding .}" 
                                     FontSize="12" Padding="6"/>
-                            <Button Grid.Column="4" Text="Release" 
+                                    <Button Grid.Column="4" Text="Release" 
                                     Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:TeamViewModel}}, Path=ReleasePlayerCommand}" 
                                     CommandParameter="{Binding .}" 
                                     BackgroundColor="DarkRed" TextColor="White"
                                     FontSize="12" Padding="6"/>
-                        </Grid>
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
-        </RefreshView>
+                                </Grid>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
 
-        <!-- Bench Players -->
-        <VerticalStackLayout Grid.Row="2" Padding="10" Spacing="5">
-            <Label Text="Bench Players" FontSize="16" FontAttributes="Bold" />
-            <CollectionView ItemsSource="{Binding BenchPlayers}" SelectionMode="Single" SelectedItem="{Binding SelectedPlayer}">
-                <CollectionView.ItemTemplate>
-                    <DataTemplate>
-                        <Grid Padding="10">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="70"/>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="90"/>
-                                <ColumnDefinition Width="90"/>
-                            </Grid.ColumnDefinitions>
-                            <Image Grid.Column="0" Source="{Binding Nationality, Converter={StaticResource NationalityToFlagConverter}}" 
+                    <Label Text="Bench Players" FontSize="18" FontAttributes="Bold"/>
+                    <CollectionView ItemsSource="{Binding BenchPlayers}" SelectionMode="None">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Padding="10">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="70"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="90"/>
+                                        <ColumnDefinition Width="90"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Image Grid.Column="0" Source="{Binding Nationality, Converter={StaticResource NationalityToFlagConverter}}" 
                                    WidthRequest="40" HeightRequest="30" Aspect="AspectFill" />
 
-                            <VerticalStackLayout Grid.Column="2" Spacing="2">
-                                <Label Text="{Binding FullName}" FontAttributes="Bold" />
-                                <Label Text="{Binding Role}" FontSize="14" />
-                                <Label Text="{Binding Stats.Rating, StringFormat='Rating: {0:F2}'}" FontSize="12" />
-                            </VerticalStackLayout>
+                                    <VerticalStackLayout Grid.Column="2" Spacing="2">
+                                        <Label Text="{Binding FullName}" FontAttributes="Bold" />
+                                        <Label Text="{Binding Role}" FontSize="14" />
+                                        <Label Text="{Binding Stats.Rating, StringFormat='Rating: {0:F2}'}" FontSize="12" />
+                                    </VerticalStackLayout>
 
-                            <!--<Button Grid.Column="3" Text="Activate" Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:TeamViewModel}}, Path=ActivatePlayerCommand}" 
+                                    <!--<Button Grid.Column="3" Text="Activate" Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:TeamViewModel}}, Path=ActivatePlayerCommand}" 
                                     CommandParameter="{Binding .}" />-->
-                            <Button Grid.Column="3" Text="Activate" 
+                                    <Button Grid.Column="3" Text="Activate" 
                                 Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:TeamViewModel}}, Path=ActivatePlayerCommand}" 
                                 CommandParameter="{Binding .}" 
                                 FontSize="12" Padding="6"/>
-                            <Button Grid.Column="4" Text="Release" 
+                                    <Button Grid.Column="4" Text="Release" 
                                 Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:TeamViewModel}}, Path=ReleasePlayerCommand}" 
                                 CommandParameter="{Binding .}" 
                                 BackgroundColor="DarkRed" TextColor="White"
                                 FontSize="12" Padding="6"/>
-                        </Grid>
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
-        </VerticalStackLayout>
+                                </Grid>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </VerticalStackLayout>
+            </ScrollView>
+
+            <!-- Right: Match History -->
+            <ScrollView Grid.Column="1">
+                <VerticalStackLayout Padding="10" Spacing="5">
+                    <Label Text="Match History" FontSize="18" FontAttributes="Bold" />
+                    <CollectionView ItemsSource="{Binding MatchHistory}">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <Frame Padding="8" BorderColor="LightGray" CornerRadius="8" Margin="0,5">
+                                    <VerticalStackLayout Spacing="2">
+                                        <Label Text="{Binding Tournament.Name}" FontAttributes="Bold" />
+                                        <Label Text="{Binding Stage}" FontSize="12" />
+                                        <Label Text="{Binding Map, StringFormat='Map: {0}'}" FontSize="12" />
+                                        <Label>
+                                            <Label.FormattedText>
+                                                <FormattedString>
+                                                    <Span Text="{Binding Team1.Name}" />
+                                                    <Span Text=" vs " />
+                                                    <Span Text="{Binding Team2.Name}" />
+                                                    <Span Text=" - " />
+                                                    <Span Text="{Binding Score}" />
+                                                </FormattedString>
+                                            </Label.FormattedText>
+                                        </Label>
+                                        <Label Text="{Binding Week, StringFormat='Week {0}'}" FontSize="10" />
+                                    </VerticalStackLayout>
+                                </Frame>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </VerticalStackLayout>
+            </ScrollView>
+        </Grid>
     </Grid>
 </ContentPage>

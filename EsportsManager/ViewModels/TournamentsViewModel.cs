@@ -31,13 +31,13 @@ namespace EsportsManager.ViewModels
 
         public TournamentsViewModel(GameService gameService) : base(gameService)
         {
+            _currentFilter = "Active";
             Tournaments = new ObservableCollection<Tournament>(); 
             RefreshCommand = new Command(RefreshTournaments);
             FilterCommand = new Command<string>(FilterTournaments);
             ViewTournamentCommand = new Command<Tournament>(ViewTournament);
             ViewTeamCommand = new Command<Team>(ViewTeam);
-
-            FilterTournaments(_currentFilter);
+            RefreshTournaments();
         }
 
         private void RefreshTournaments()
@@ -113,14 +113,30 @@ namespace EsportsManager.ViewModels
             {
                 if (tournament == null) return;
                 SelectedTournament = null;
+                bool t = tournament.Winner == null;
+                if(t)
+                {
+                    await Application.Current.MainPage.DisplayAlert(tournament.Name,
+                        $"Tier: {tournament.Tier}\n" +
+                        $"Prize Pool: ${tournament.PrizePool:N0}\n" +
+                        $"Date: Week {tournament.Week} of {tournament.Year}\n" +
+                        $"Teams: {tournament.ParticipatingTeams.Count}\n" +
+                        $"Matches Played: {tournament.Matches.Count(m => m.IsCompleted)}/{tournament.Matches.Count}",
+                        "OK");
+                }
+                else
+                {
+                    await Application.Current.MainPage.DisplayAlert(tournament.Name,
+                        $"Tier: {tournament.Tier}\n" +
+                        $"Prize Pool: ${tournament.PrizePool:N0}\n" +
+                        $"Date: Week {tournament.Week} of {tournament.Year}\n" +
+                        $"Teams: {tournament.ParticipatingTeams.Count}\n" +
+                        $"Matches Played: {tournament.Matches.Count(m => m.IsCompleted)}/{tournament.Matches.Count}\n" +
+                        $"Winner: {tournament.Winner.Name}",
+                        "OK");
+                }
 
-                await Application.Current.MainPage.DisplayAlert(tournament.Name,
-                    $"Tier: {tournament.Tier}\n" +
-                    $"Prize Pool: ${tournament.PrizePool:N0}\n" +
-                    $"Date: Week {tournament.Week} of {tournament.Year}\n" +
-                    $"Teams: {tournament.ParticipatingTeams.Count}\n" +
-                    $"Matches Played: {tournament.Matches.Count(m => m.IsCompleted)}/{tournament.Matches.Count}",
-                    "OK");
+                    
             }
             catch (Exception ex)
             {

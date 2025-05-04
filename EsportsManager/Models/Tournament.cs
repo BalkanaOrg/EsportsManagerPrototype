@@ -15,6 +15,7 @@ namespace EsportsManager.Models
         public Team Winner { get; set; }
         public bool IsCompleted { get; set; }
 
+        public int TeamCount { get; set; }
         private List<Team> _participatingTeams = new();
         public List<Team> ParticipatingTeams
         {
