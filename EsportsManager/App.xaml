@@ -17,7 +17,7 @@
             <local:NationalityToFlagConverter x:Key="NationalityToFlagConverter" />
             <local:InverseBoolConverter x:Key="InverseBoolConverter" />
             <local:InverseNullToBoolConverter x:Key="InverseNullToBoolConverter" />
-
+            <local:BoolToColorConverter x:Key="BoolToColorConverter" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>

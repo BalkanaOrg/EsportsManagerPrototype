@@ -1,8 +1,10 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using EsportsManager.Models;
 using EsportsManager.Services;
+using EsportsManager.Views;
 using System;
 using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace EsportsManager.ViewModels
 {
@@ -23,6 +25,7 @@ namespace EsportsManager.ViewModels
             get => _teamId;
             set => SetProperty(ref _teamId, value, onChanged: () => LoadTeam(value));
         }
+        public ICommand ViewPlayerCommand;
 
         private readonly GameService _gameService;
 
@@ -31,6 +34,7 @@ namespace EsportsManager.ViewModels
             try
             {
                 _gameService = gameService;
+                ViewPlayerCommand = new Command<Player>(ShowPlayerProfile);
             }
             catch
             {
@@ -52,6 +56,20 @@ namespace EsportsManager.ViewModels
             catch (Exception ex)
             {
                 Console.WriteLine($"Error loading team: {ex}");
+                await Shell.Current.DisplayAlert("Error", ex.Message, "OK");
+            }
+        }
+
+        private async void ShowPlayerProfile(Player player)
+        {
+            try
+            {
+                if (player == null) return;
+                await Shell.Current.GoToAsync($"{nameof(TeamProfileView)}?TeamId={player.Id}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error navigating to player: {ex}");
                 await Shell.Current.DisplayAlert("Error", ex.Message, "OK");
             }
         }

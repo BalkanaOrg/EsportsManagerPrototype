@@ -20,6 +20,7 @@
                 <Button Text="Active" Command="{Binding FilterCommand}" CommandParameter="Active" />
                 <Button Text="Upcoming" Command="{Binding FilterCommand}" CommandParameter="Upcoming" />
                 <Button Text="Completed" Command="{Binding FilterCommand}" CommandParameter="Completed" />
+                <Button Text="{Binding InvitationFilter}" Command="{Binding CycleInvitationFilterCommand}" />
             </HorizontalStackLayout>
 
             <!-- Scrollable Tournament List -->

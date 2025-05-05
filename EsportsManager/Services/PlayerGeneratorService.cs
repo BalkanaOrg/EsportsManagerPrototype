@@ -18,24 +18,23 @@ public static class PlayerGeneratorService
         "Deity", "Soul", "Ghost", "Time", "Example", "Simple", "Exquisite", "Fire", "Ice", "Storm", "Cloud"
     };
 
-    // Nationality data with name generators
     private static readonly Dictionary<string, (string[] firstNames, string[] lastNames, string[] nickPrefixes, string[] nickSuffixes)> NationalityData = new()
     {
-        // Germany
+
         ["Germany"] = (
             new[] { "Hans", "Johannes", "Maximilian", "Lukas", "Timo", "Felix", "Leon", "Paul", "Elias", "Carl" },
             new[] { "Müller", "Schmidt", "Schneider", "Fischer", "Weber", "Meyer", "Wagner", "Becker", "Schulz", "Hoffmann" },
             new[] { "Kaiser", "Blitz", "Panzer", "Fuchs", "Sturm", "Eisen", "Donner", "Falke", "Jäger", "Stahl" },
             new[] { "X", "er", "y", "z", "meister", "inator", "man", "fox", "hawk", "king" }
         ),
-        // Bulgaria
+
         ["Bulgaria"] = (
             new[] { "Georgi", "Ivan", "Dimitar", "Alexander", "Stefan", "Nikolay", "Vasil", "Petar", "Hristo", "Todor" },
             new[] { "Ivanov", "Georgiev", "Dimitrov", "Petrov", "Nikolov", "Hristov", "Stoyanov", "Todorov", "Angelov", "Vasilev", "Vazov", "Markov", "Kirev", "Aleksandrov" },
             new[] { "Balkan", "Tsar", "Vihren", "Pirin", "Rila", "Struma", "Maritsa", "Lev", "Orel", "Zmey", "Knqz", "Imperator", "Vlastelin", "Pomak", "Tank", "Bolyar"  },
             new[] { "ov", "sky", "bg", "cho", "to", "ko", "vitz", "off", "ich", "ar" }
         ),
-        // UK
+
         ["UK"] = (
             new[] { "John", "James", "Robert", "Michael", "William", "David", "Richard", "Joseph", "Thomas", "Charles", "Albert", "Steven", "Alexander" },
             new[] { "Smith", "Jones", "Taylor", "Brown", "Williams", "Wilson", "Johnson", "Davies", "Robinson", "Wright" },
@@ -350,44 +349,10 @@ public static class PlayerGeneratorService
         else
         {
             nickname = $"{internationalNicknames[random.Next(internationalNicknames.Length)]}";
-            // Randomly alter capitalization
+            // Randomly alter capitalization, те така за здраве.
             if (random.Next(2) == 0)
                 nickname = AlterCapitalization(nickname);
         }
-
-        //switch (pattern)
-        //{
-        //    case 0: // FirstName + LastName initial
-        //        nickname = $"{firstName}{lastName[0]}";
-        //        break;
-        //    case 1: // FirstName initial + LastName
-        //        nickname = $"{firstName[0]}{lastName}";
-        //        break;
-        //    case 2: // FirstName initial + LastName
-        //        nickname = $"{firstName.Substring(0, 3)}{lastName.Substring(0, 3)}";
-        //        break;
-        //    case 4: // Random prefix + suffix
-        //        string prefix = data.nickPrefixes[random.Next(data.nickPrefixes.Length)];
-        //        string suffix = data.nickSuffixes[random.Next(data.nickSuffixes.Length)];
-        //        nickname = $"{prefix}{suffix}";
-        //        // Randomly alter capitalization
-        //        if (random.Next(2) == 0)
-        //            nickname = AlterCapitalization(nickname);
-        //        break;
-
-        //    case 5: // Just a prefix
-        //        nickname = data.nickPrefixes[random.Next(data.nickPrefixes.Length)];
-        //        if (random.Next(2) == 0)
-        //            nickname = AlterCapitalization(nickname);
-        //        break;
-        //    default:
-        //        nickname = $"{internationalNicknames[random.Next(internationalNicknames.Length)]}";
-        //        // Randomly alter capitalization
-        //        if (random.Next(2) == 0)
-        //            nickname = AlterCapitalization(nickname);
-        //        break;
-        //}
-
         // Random age between 16 and 30
         int age = random.Next(16, 31);
         DateTime birthDate = DateTime.Now.AddYears(-age).AddMonths(-random.Next(12));

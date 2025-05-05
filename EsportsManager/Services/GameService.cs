@@ -12,6 +12,7 @@ public class GameService
     int major2Week = 40;
     Tournament major1;
     Tournament major2;
+    public List<int> playedYears = new();
 
     private readonly List<string> _nationalities = new()
     {
@@ -63,14 +64,13 @@ public class GameService
         };
         _gameState.AllTeams.Add(_gameState.UserTeam);
         _gameState.Budget = budget;
+        playedYears.Add(_gameState.CurrentYear);
 
         GenerateAITeams(200);
 
         GenerateFreeAgents(130);
 
         GenerateInitialTournaments();
-
-        //AssignInitialTournamentParticipation();
     }
 
     private void GenerateAITeams(int count)
@@ -543,6 +543,9 @@ public class GameService
                         t.Week <= _gameState.CurrentWeek &&
                         t.Week + t.DurationWeeks > _gameState.CurrentWeek)
             .ToList();
+        _gameState.UpcomingTournaments = _gameState.ActiveTournaments
+            .Where(t => t.Year >= _gameState.CurrentYear &&
+            t.Week > _gameState.CurrentWeek).ToList();
         foreach (var tournament in tournamentsThisWeek)
         {
             ProcessTournamentWeek(tournament);
@@ -554,6 +557,7 @@ public class GameService
             _gameState.CurrentWeek = 1;
             _gameState.CurrentYear++;
 
+            playedYears.Add(_gameState.CurrentYear);
             GenerateInitialTournaments();
         }
 
@@ -589,6 +593,7 @@ public class GameService
         }
         _gameState.Budget = _gameState.UserTeam.Budget;
         _gameState.Budget -= _gameState.WeeklyExpense;
+        ProcessTeamBudget();
         PopulateNextTournament();
         UpdateTeamRankings();
     }
@@ -628,6 +633,13 @@ public class GameService
             {
                 ProcessTournamentWeek(tournament);
             }
+        }
+    }
+    private void ProcessTeamBudget()
+    {
+        foreach (var team in _gameState.AllTeams)
+        {
+            if(team != null) team.Budget -= team.WeeklyExpense;
         }
     }
 
@@ -931,13 +943,14 @@ public class GameService
                     double chance = random.NextDouble() * totalStrength;
                     if (chance < team1Strength) ot1++;
                     else ot2++;
+                    if (ot1 > 3 || ot2 > 3)
+                    {
+                        hasWinner = true;
+                        break;
+                    }
                 }
 
                 // If a team wins more than 3 rounds in OT, that team wins
-                if (ot1 > 3 || ot2 > 3)
-                {
-                    hasWinner = true;
-                }
                 team1Rounds += ot1;
                 team2Rounds += ot2;
             }
@@ -1122,7 +1135,7 @@ public class GameService
         return _gameState.CompletedTournaments
             .Concat(_gameState.ActiveTournaments)
             .SelectMany(t => t.Matches)
-            .Where(m => m.IsCompleted)
+            .Where(m => m.IsCompleted && (m.Year == _gameState.CurrentYear || m.Year == _gameState.CurrentYear-1))
             .ToList();
     }
 
@@ -1155,7 +1168,7 @@ public class GameService
 
     private double CalculateTeamStrength(Team team)
     {
-        if (team.Players.Count == 0) return 0;
+        if (team.Players.Count == 0 || team == null) return 0;
 
         double totalStrength = 0;
         double roleSynergyBonus = 1.0;

@@ -11,6 +11,19 @@ namespace EsportsManager.ViewModels
         private ObservableCollection<Tournament> _tournaments;
         private Tournament _selectedTournament;
         private string _currentFilter = "Active";
+        private string _invitationFilter = "All"; // Options: "All", "Invited", "Not Invited"
+        public string InvitationFilter
+        {
+            get => _invitationFilter;
+            set
+            {
+                if (SetProperty(ref _invitationFilter, value))
+                {
+                    FilterTournaments(_currentFilter); // re-apply filters
+                }
+            }
+        }
+
 
         public ObservableCollection<Tournament> Tournaments
         {
@@ -28,6 +41,7 @@ namespace EsportsManager.ViewModels
         public ICommand FilterCommand { get; }
         public ICommand ViewTournamentCommand { get; }
         public ICommand ViewTeamCommand { get; }
+        public ICommand CycleInvitationFilterCommand { get; }
 
         public TournamentsViewModel(GameService gameService) : base(gameService)
         {
@@ -37,6 +51,7 @@ namespace EsportsManager.ViewModels
             FilterCommand = new Command<string>(FilterTournaments);
             ViewTournamentCommand = new Command<Tournament>(ViewTournament);
             ViewTeamCommand = new Command<Team>(ViewTeam);
+            CycleInvitationFilterCommand = new Command(CycleInvitationFilter);
             RefreshTournaments();
         }
 
@@ -58,24 +73,35 @@ namespace EsportsManager.ViewModels
         {
             _currentFilter = filter;
             var state = _gameService.GetGameState();
+            var userTeam = state.UserTeam;
 
-            switch (filter)
+            IEnumerable<Tournament> baseList = filter switch
             {
-                case "Active":
-                    Tournaments = new ObservableCollection<Tournament>(
-                        state.ActiveTournaments.OrderBy(t => t.Week).ThenBy(t => t.Tier));
-                    break;
-                case "Upcoming":
-                    // Find tournaments that haven't started yet
-                    var upcoming = state.UpcomingTournaments
-                        .OrderBy(t => t.Week)
-                        .ThenBy(t => t.Tier);
-                    Tournaments = new ObservableCollection<Tournament>(upcoming);
-                    break;
-                case "Completed":
-                    Tournaments = new ObservableCollection<Tournament>(state.CompletedTournaments.OrderBy(t => t.Year).ThenBy(t => t.Week));
-                    break;
-            }
+                "Active" => state.ActiveTournaments,
+                "Upcoming" => state.UpcomingTournaments,
+                "Completed" => state.CompletedTournaments,
+                _ => state.ActiveTournaments
+            };
+
+            var filtered = baseList;
+
+            if (InvitationFilter == "Invited")
+                filtered = filtered.Where(t => t.ParticipatingTeams.Contains(userTeam));
+            else if (InvitationFilter == "Not Invited")
+                filtered = filtered.Where(t => !t.ParticipatingTeams.Contains(userTeam));
+
+            Tournaments = new ObservableCollection<Tournament>(
+                filtered.OrderBy(t => t.Week).ThenBy(t => t.Tier));
+        }
+
+        private void CycleInvitationFilter()
+        {
+            InvitationFilter = InvitationFilter switch
+            {
+                "All" => "Invited",
+                "Invited" => "Not Invited",
+                _ => "All"
+            };
         }
 
         private async void ViewTournament(Tournament tournament)
@@ -114,14 +140,17 @@ namespace EsportsManager.ViewModels
                 if (tournament == null) return;
                 SelectedTournament = null;
                 bool t = tournament.Winner == null;
-                if(t)
+                var invitedTeams = tournament.ParticipatingTeams.ToList();
+                bool a = invitedTeams.Contains(_gameService.GetGameState().UserTeam);
+                if (t)
                 {
                     await Application.Current.MainPage.DisplayAlert(tournament.Name,
                         $"Tier: {tournament.Tier}\n" +
                         $"Prize Pool: ${tournament.PrizePool:N0}\n" +
                         $"Date: Week {tournament.Week} of {tournament.Year}\n" +
                         $"Teams: {tournament.ParticipatingTeams.Count}\n" +
-                        $"Matches Played: {tournament.Matches.Count(m => m.IsCompleted)}/{tournament.Matches.Count}",
+                        $"Matches Played: {tournament.Matches.Count(m => m.IsCompleted)}/{tournament.Matches.Count} \n" +
+                        $"{(a? "Invited" : "Not Invited")}",
                         "OK");
                 }
                 else
@@ -131,7 +160,8 @@ namespace EsportsManager.ViewModels
                         $"Prize Pool: ${tournament.PrizePool:N0}\n" +
                         $"Date: Week {tournament.Week} of {tournament.Year}\n" +
                         $"Teams: {tournament.ParticipatingTeams.Count}\n" +
-                        $"Matches Played: {tournament.Matches.Count(m => m.IsCompleted)}/{tournament.Matches.Count}\n" +
+                        $"Matches Played: {tournament.Matches.Count(m => m.IsCompleted)}/{tournament.Matches.Count} \n" +
+                        $"{(a ? "Invited" : "Not Invited")}\n" +
                         $"Winner: {tournament.Winner.Name}",
                         "OK");
                 }
